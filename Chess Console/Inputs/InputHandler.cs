@@ -1,4 +1,6 @@
-﻿namespace Chess_Console.Inputs
+﻿using Chess_Console.Others;
+
+namespace Chess_Console.Inputs
 {
     internal class InputHandler : IInputHandler
     {

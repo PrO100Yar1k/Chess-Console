@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Ярослав\\source\\repos\\Chess Console\\Chess Console\\Chess Console.csproj": {}
+    "C:\\Users\\Ярослав\\source\\repos\\Chess Console\\Chess-Console\\Chess Console\\Chess Console.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Ярослав\\source\\repos\\Chess Console\\Chess Console\\Chess Console.csproj": {
+    "C:\\Users\\Ярослав\\source\\repos\\Chess Console\\Chess-Console\\Chess Console\\Chess Console.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Ярослав\\source\\repos\\Chess Console\\Chess Console\\Chess Console.csproj",
+        "projectUniqueName": "C:\\Users\\Ярослав\\source\\repos\\Chess Console\\Chess-Console\\Chess Console\\Chess Console.csproj",
         "projectName": "Chess Console",
-        "projectPath": "C:\\Users\\Ярослав\\source\\repos\\Chess Console\\Chess Console\\Chess Console.csproj",
+        "projectPath": "C:\\Users\\Ярослав\\source\\repos\\Chess Console\\Chess-Console\\Chess Console\\Chess Console.csproj",
         "packagesPath": "C:\\Users\\Ярослав\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Ярослав\\source\\repos\\Chess Console\\Chess Console\\obj\\",
+        "outputPath": "C:\\Users\\Ярослав\\source\\repos\\Chess Console\\Chess-Console\\Chess Console\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

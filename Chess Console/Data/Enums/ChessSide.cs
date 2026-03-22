@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Chess_Console
+namespace Chess_Console.Data.Enums
 {
     internal enum ChessSide
     {

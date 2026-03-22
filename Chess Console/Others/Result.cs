@@ -1,5 +1,4 @@
-﻿
-namespace Chess_Console
+﻿namespace Chess_Console.Others
 {
     internal class Result<T>
     {

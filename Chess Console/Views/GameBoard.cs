@@ -1,4 +1,5 @@
-﻿using Chess_Console.Others;
+﻿using Chess_Console.Data.Enums;
+using Chess_Console.Others;
 using Chess_Console.Pieces.Base;
 using Chess_Console.Pieces.Instances;
 

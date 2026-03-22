@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Chess_Console
+namespace Chess_Console.Others
 {
     internal sealed class GameEvents
     {
@@ -17,10 +17,5 @@ namespace Chess_Console
         {
 
         }
-
-        public event Action OnChessPieceSpawned = default;
-
-        public void ChessPieceSpawned()
-            => OnChessPieceSpawned?.Invoke();
     }
 }
