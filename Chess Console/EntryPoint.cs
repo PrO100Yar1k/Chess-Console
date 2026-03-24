@@ -1,7 +1,5 @@
-﻿using Chess_Console.Inputs;
-using Chess_Console.StateMachine.Controller;
+﻿using Chess_Console.StateMachine.Controller;
 using Chess_Console.StateMachine.GameState;
-using Chess_Console.Views;
 
 namespace Chess_Console
 {

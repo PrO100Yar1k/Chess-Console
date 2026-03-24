@@ -1,5 +1,4 @@
-﻿
-using Chess_Console.Data.Enums;
+﻿using Chess_Console.Data.Enums;
 
 namespace Chess_Console.Pieces.Base
 {
@@ -15,7 +14,7 @@ namespace Chess_Console.Pieces.Base
 
         public Vector2 PiecePosition { get; private set; }
 
-        public virtual bool isJumpOverPieces { get; } = false;
+        public virtual bool isCanJumpOverPieces { get; } = false;
 
         #region IDisposable
 
@@ -97,6 +96,5 @@ namespace Chess_Console.Pieces.Base
                 }
             }
         }
-
     }
 }

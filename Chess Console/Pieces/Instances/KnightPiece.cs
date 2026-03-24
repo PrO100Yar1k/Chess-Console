@@ -24,7 +24,7 @@ namespace Chess_Console.Pieces.Instances
 
         protected override int _maxDistance => 1;
 
-        public override bool isJumpOverPieces { get; } = true;
+        public override bool isCanJumpOverPieces { get; } = true;
 
         public KnightPiece(Vector2 piecePosition, ChessSide chessSide) : base(piecePosition, chessSide)
         {

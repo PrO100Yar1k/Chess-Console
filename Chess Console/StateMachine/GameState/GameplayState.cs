@@ -1,4 +1,5 @@
-﻿using Chess_Console.Inputs;
+﻿using Chess_Console.Data.Enums;
+using Chess_Console.Inputs;
 using Chess_Console.Views;
 
 namespace Chess_Console.StateMachine.GameState
@@ -45,10 +46,15 @@ namespace Chess_Console.StateMachine.GameState
                 if (!_board.ValidateMovement(playerMovement.StartPoint, playerMovement.FinalPoint))
                     Console.WriteLine("Incorrect input!!!");
 
-                //make movement
+                if (_board.ValidateCheck(ChessSide.Enemy))
+                    Console.WriteLine("Nice! Enemy have check!");
+
+                // ----------------------------------------------- \\
 
                 //Move enemyMovement = _enemyInput.GetInputMovement();
-                //make movement
+
+                if (_board.ValidateCheck(ChessSide.Player))
+                    Console.WriteLine("Warning! You have check!");
             }
 
             return Task.CompletedTask;
