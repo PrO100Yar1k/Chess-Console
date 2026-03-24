@@ -117,18 +117,10 @@ namespace Chess_Console.Views
         }
 
 
-        public bool CheckMovementOverPiece(ChessPiece piece, Vector2 targetPosition, ChessAction chessAction) //
+        public bool CheckMovementOverPiece(ChessPiece piece, Vector2 targetPosition, ChessAction chessAction)
         {
-            if (piece.isCanJumpOverPieces)
-                return MakeChessPieceStep(piece, targetPosition);
-
-            var path = piece.GetMovementPath(targetPosition, chessAction);
-
-            foreach (var position in path)
-            {
-                if (_board[position.Y, position.X] != null)
-                    return false;
-            }
+            if (!isPathClear(piece, targetPosition, chessAction))
+                return false;
 
             return MakeChessPieceStep(piece, targetPosition);
         }
@@ -162,13 +154,32 @@ namespace Chess_Console.Views
 
                     if (piece != null && piece.ChessSide == attackingSide)
                     {
-                        if (piece.CheckBeating(kingPosition) && IsPathClear(piece, kingPosition))
+                        if (piece.CheckBeating(kingPosition) && isPathClear(piece, kingPosition, ChessAction.Beating))
                             return true;
                     }
                 }
             }
 
             return false;
+        }
+
+        private bool isPathClear(ChessPiece piece, Vector2 targetPosition, ChessAction chessAction)
+        {
+            if (piece.isCanJumpOverPieces)
+                return true;
+
+            var path = piece.GetMovementPath(targetPosition, chessAction);
+
+            foreach (var currentPosition in path)
+            {
+                if (currentPosition == targetPosition)
+                    continue;
+
+                if (_board[currentPosition.Y, currentPosition.X] != null)
+                    return false;
+            }
+
+            return true;
         }
 
         private Vector2 FindKingPosition(ChessSide targetSide)
@@ -186,21 +197,6 @@ namespace Chess_Console.Views
             return new Vector2(-1, -1);
         }
 
-        private bool IsPathClear(ChessPiece piece, Vector2 target)
-        {
-            if (piece.isCanJumpOverPieces)
-                return true;
-
-            var path = piece.GetMovementPath(target, ChessAction.Beating);
-
-            foreach (var position in path)
-            {
-                if (_board[position.Y, position.X] != null)
-                    return false;
-            }
-
-            return true;
-        }
 
         #endregion
 
