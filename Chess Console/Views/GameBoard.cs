@@ -97,12 +97,15 @@ namespace Chess_Console.Views
 
         #region Movement Validation & Making Step
 
-        public bool ValidateMovement(Vector2 startPosition, Vector2 targetPosition)
+        public bool ValidateMovement(Vector2 startPosition, Vector2 targetPosition, ChessSide chessSide)
         {
             ChessPiece chessPiece = _board[startPosition.Y, startPosition.X];
 
             if (chessPiece == null)
                 return false;
+
+            //if (ValidateCheck(chessSide))
+
 
             if (_board[targetPosition.Y, targetPosition.X] == null)
             {
@@ -139,11 +142,12 @@ namespace Chess_Console.Views
 
         public bool ValidateCheck(ChessSide sideUnderAttack)
         {
-            Vector2 kingPosition = FindKingPosition(sideUnderAttack);
+            var kingPositionResult = FindKingPosition(sideUnderAttack);
 
-            if (kingPosition.X == -1)
+            if (!kingPositionResult.IsSuccess)
                 return false;
 
+            Vector2 kingPosition = kingPositionResult.Value;
             ChessSide attackingSide = (sideUnderAttack == ChessSide.Player) ? ChessSide.Enemy : ChessSide.Player;
 
             for (int y = 0; y < _boardHeight; y++)
@@ -160,6 +164,11 @@ namespace Chess_Console.Views
                 }
             }
 
+            return false;
+        }
+
+        public bool ValidateCheckmate(ChessSide sideUnderAttack)
+        {
             return false;
         }
 
@@ -182,7 +191,7 @@ namespace Chess_Console.Views
             return true;
         }
 
-        private Vector2 FindKingPosition(ChessSide targetSide)
+        private Result<Vector2> FindKingPosition(ChessSide targetSide)
         {
             for (int y = 0; y < _boardHeight; y++)
             {
@@ -191,10 +200,11 @@ namespace Chess_Console.Views
                     var piece = _board[y, x];
 
                     if (piece is KingPiece && piece.ChessSide == targetSide)
-                        return new Vector2(x, y);
+                        return Result<Vector2>.Success(new Vector2(x, y));
                 }
             }
-            return new Vector2(-1, -1);
+
+            return Result<Vector2>.Failure("The King was not found!");
         }
 
 

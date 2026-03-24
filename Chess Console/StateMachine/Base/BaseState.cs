@@ -1,9 +1,8 @@
-﻿
-namespace Chess_Console.StateMachine
+﻿namespace Chess_Console.StateMachine
 {
     internal abstract class BaseState : IDisposable
     {
-        protected ISwitchableState? _switchable = default;
+        protected readonly ISwitchableState _switchable;
 
         #region IDisposable
 

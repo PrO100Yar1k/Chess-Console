@@ -1,23 +1,30 @@
 ﻿using Chess_Console.Data.Enums;
 using Chess_Console.Inputs;
+using Chess_Console.Others;
 using Chess_Console.Views;
 
 namespace Chess_Console.StateMachine.GameState
 {
     internal class GameplayState : BaseState
     {
-        private CancellationTokenSource _cancellationTokenSource = default;
+        private CancellationTokenSource _cancellationTokenSource;
 
-        private IGeneralInput _playerInput = default;
-        private IGeneralInput _enemyInput = default;
+        private readonly IInputHandler _playerInputHandler;
+        private readonly IInputHandler _enemyInputHandler;
 
-        private GameBoard _board = default;
+        private readonly IGeneralInput _playerInput;
+        private readonly IGeneralInput _enemyInput;
+
+        private readonly GameBoard _board;
 
         public GameplayState(ISwitchableState switchable) : base(switchable)
         {
             _board = new GameBoard();
 
-            _playerInput = new PlayerInput();
+            _playerInputHandler = new InputHandler();
+            _playerInput = new PlayerInput(_playerInputHandler);
+
+            //_enemyInputHandler = new InputHandler();
             _enemyInput = new EnemyInput();
         }
 
@@ -38,26 +45,61 @@ namespace Chess_Console.StateMachine.GameState
             {
                 _board.DisplayBoard();
 
+                // ----------------------------------------------- \\
+
+                if (_board.ValidateCheckmate(ChessSide.Player))
+                {
+                    _switchable.SwitchState<GameCompletionState>();
+                    GameEvents.Instance.GameCompletion(ChessSide.Player);
+
+                    return Task.CompletedTask;
+                }
+
                 Move playerMovement = _playerInput.GetInputMovement();
+                //DisplayMovement(playerMovement);
 
-                //Console.WriteLine($"{playerMovement.StartPoint.X} {playerMovement.StartPoint.Y}");
-                //Console.WriteLine($"{playerMovement.FinalPoint.X}:{playerMovement.FinalPoint.Y}");
-
-                if (!_board.ValidateMovement(playerMovement.StartPoint, playerMovement.FinalPoint))
+                if (!_board.ValidateMovement(playerMovement.StartPoint, playerMovement.FinalPoint, ChessSide.Player))
+                {
                     Console.WriteLine("Incorrect input!!!");
+                    continue;
+                }
 
                 if (_board.ValidateCheck(ChessSide.Enemy))
                     Console.WriteLine("Nice! Enemy have check!");
 
+
+
                 // ----------------------------------------------- \\
 
+
+
+                if (_board.ValidateCheckmate(ChessSide.Enemy))
+                {
+                    _switchable.SwitchState<GameCompletionState>();
+                    GameEvents.Instance.GameCompletion(ChessSide.Enemy);
+
+                    return Task.CompletedTask;
+                }
+
                 //Move enemyMovement = _enemyInput.GetInputMovement();
+                //DisplayMovement(enemyMovement);
 
                 if (_board.ValidateCheck(ChessSide.Player))
                     Console.WriteLine("Warning! You have check!");
             }
 
             return Task.CompletedTask;
+        }
+
+        private void ExecureTurn()
+        {
+            // to do
+        }
+
+        private void DisplayMovement(Move movement)
+        {
+            Console.WriteLine($"From: {movement.StartPoint.X} {movement.StartPoint.Y}");
+            Console.WriteLine($"To: {movement.FinalPoint.X} {movement.FinalPoint.Y}");
         }
     }
 }

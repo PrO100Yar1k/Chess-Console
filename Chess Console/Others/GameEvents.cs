@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Chess_Console.Data.Enums;
 
 namespace Chess_Console.Others
 {
@@ -17,5 +13,10 @@ namespace Chess_Console.Others
         {
 
         }
+
+        public event Action<ChessSide> OnGameCompletion;
+
+        public void GameCompletion(ChessSide winnerSide)
+            => OnGameCompletion?.Invoke(winnerSide);
     }
 }

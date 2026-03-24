@@ -1,13 +1,17 @@
-﻿
-namespace Chess_Console.Inputs
+﻿namespace Chess_Console.Inputs
 {
     internal class PlayerInput : IGeneralInput
     {
-        private readonly InputHandler _inputHandler = new InputHandler();
+        private readonly IInputHandler _inputHandler;
+
+        public PlayerInput(IInputHandler inputHandler)
+        {
+            _inputHandler = inputHandler;
+        }
 
         public Move GetInputMovement()
         {
-            while (true) // to do
+            while (true)
             {
                 Console.WriteLine("\nEnter your movement (for example, e2 e3):");
 
