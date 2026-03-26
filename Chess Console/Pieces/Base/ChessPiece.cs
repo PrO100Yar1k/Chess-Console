@@ -7,14 +7,14 @@ namespace Chess_Console.Pieces.Base
         protected abstract Vector2[] _possibleDirectionMoves { get; }
         protected abstract Vector2[] _possibleDirectionBeating { get; }
 
-        public abstract char ChessPieceChar { get; }
         protected abstract int _maxDistance { get; }
+        public abstract char ChessPieceChar { get; }
+
+        public virtual bool isCanJumpOverPieces { get; } = false;
 
         public readonly ChessSide ChessSide = default;
 
         public Vector2 PiecePosition { get; private set; }
-
-        public virtual bool isCanJumpOverPieces { get; } = false;
 
         #region IDisposable
 
@@ -36,7 +36,7 @@ namespace Chess_Console.Pieces.Base
             PiecePosition = piecePosition;
         }
 
-        public virtual void MakeMovement(Vector2 targetPosition)
+        public virtual void SetPosition(Vector2 targetPosition)
         {
             PiecePosition = targetPosition;
         }

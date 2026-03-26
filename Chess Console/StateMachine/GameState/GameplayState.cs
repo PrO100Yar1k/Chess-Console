@@ -24,8 +24,8 @@ namespace Chess_Console.StateMachine.GameState
             _playerInputHandler = new InputHandler();
             _playerInput = new PlayerInput(_playerInputHandler);
 
-            //_enemyInputHandler = new InputHandler();
-            _enemyInput = new EnemyInput();
+            _enemyInputHandler = new InputHandler(); //
+            _enemyInput = new PlayerInput(_enemyInputHandler); //
         }
 
         public override void Start()
@@ -39,67 +39,70 @@ namespace Chess_Console.StateMachine.GameState
             _cancellationTokenSource.Cancel();
         }
 
-        private Task GameplayLoop(CancellationToken token)
+        private async Task GameplayLoop(CancellationToken token) // to do
         {
+            _board.DisplayBoard();
+
             while (!token.IsCancellationRequested)
             {
-                _board.DisplayBoard();
+                if (ValidateCheckMate(ChessSide.Player))
+                    break;
+
+                ExecuteTurn(ChessSide.Player, _playerInput);
 
                 // ----------------------------------------------- \\
 
-                if (_board.ValidateCheckmate(ChessSide.Player))
-                {
-                    _switchable.SwitchState<GameCompletionState>();
-                    GameEvents.Instance.GameCompletion(ChessSide.Player);
+                if (ValidateCheckMate(ChessSide.Enemy))
+                    break;
 
-                    return Task.CompletedTask;
-                }
-
-                Move playerMovement = _playerInput.GetInputMovement();
-                //DisplayMovement(playerMovement);
-
-                if (!_board.ValidateMovement(playerMovement.StartPoint, playerMovement.FinalPoint, ChessSide.Player))
-                {
-                    Console.WriteLine("Incorrect input!!!");
-                    continue;
-                }
-
-                if (_board.ValidateCheck(ChessSide.Enemy))
-                    Console.WriteLine("Nice! Enemy have check!");
-
-
-
-                // ----------------------------------------------- \\
-
-
-
-                if (_board.ValidateCheckmate(ChessSide.Enemy))
-                {
-                    _switchable.SwitchState<GameCompletionState>();
-                    GameEvents.Instance.GameCompletion(ChessSide.Enemy);
-
-                    return Task.CompletedTask;
-                }
-
-                //Move enemyMovement = _enemyInput.GetInputMovement();
-                //DisplayMovement(enemyMovement);
-
-                if (_board.ValidateCheck(ChessSide.Player))
-                    Console.WriteLine("Warning! You have check!");
+                ExecuteTurn(ChessSide.Enemy, _enemyInput);
             }
 
-            return Task.CompletedTask;
+            await Task.Delay(50);
         }
 
-        private void ExecureTurn()
+        private void ExecuteTurn(ChessSide side, IGeneralInput inputSource)
         {
-            // to do
+            while (true)
+            {
+                Move movement = inputSource.GetInputMovement();
+
+                if (_board.ValidateMovement(movement.StartPoint, movement.FinalPoint, side))
+                    break;
+
+                Console.WriteLine($"Incorrect input for {side}!!!");
+            }
+
+            ChessSide opponent = side.GetOpposite();
+
+            if (_board.ValidateCheck(opponent))
+            {
+                string message = opponent == ChessSide.Enemy ? "Nice! Enemy have check!" : "Warning! You have check!";
+
+                Console.WriteLine(message);
+            }
+
+            _board.DisplayBoard();
+        }
+
+        private bool ValidateCheckMate(ChessSide side)
+        {
+            if (!_board.ValidateCheckmate(side))
+                return false;
+
+            _switchable.SwitchState<GameCompletionState>();
+            GameEvents.Instance.GameCompletion(side);
+
+            return true;
         }
 
         private void DisplayMovement(Move movement)
         {
-            Console.WriteLine($"From: {movement.StartPoint.X} {movement.StartPoint.Y}");
-            Console.WriteLine($"To: {movement.FinalPoint.X} {movement.FinalPoint.Y}");
+            Console.WriteLine($"Start Point: {movement.StartPoint}");
+            Console.WriteLine($"Final Point: {movement.FinalPoint}");
+
+            //Console.WriteLine($"From: {movement.StartPoint.X} {movement.StartPoint.Y}");
+            //Console.WriteLine($"To: {movement.FinalPoint.X} {movement.FinalPoint.Y}");
         }
     }
 }

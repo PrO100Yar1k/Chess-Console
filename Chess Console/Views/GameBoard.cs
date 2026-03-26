@@ -104,26 +104,32 @@ namespace Chess_Console.Views
             if (chessPiece == null)
                 return false;
 
-            //if (ValidateCheck(chessSide))
-
+            if (chessPiece.ChessSide != chessSide)
+                return false;
 
             if (_board[targetPosition.Y, targetPosition.X] == null)
             {
                 if (chessPiece.CheckMovement(targetPosition))
-                    return CheckMovementOverPiece(chessPiece, targetPosition, ChessAction.Movement);
+                    return CheckMovementOverPiece(chessPiece, targetPosition, ChessAction.Movement, chessSide);
             }
 
             else if (chessPiece.CheckBeating(targetPosition) && isEnemyChessSide(chessPiece, targetPosition))
-                return CheckMovementOverPiece(chessPiece, targetPosition, ChessAction.Beating);
+                return CheckMovementOverPiece(chessPiece, targetPosition, ChessAction.Beating, chessSide);
 
             return false;
         }
 
 
-        public bool CheckMovementOverPiece(ChessPiece piece, Vector2 targetPosition, ChessAction chessAction)
+        public bool CheckMovementOverPiece(ChessPiece piece, Vector2 targetPosition, ChessAction chessAction, ChessSide chessSide)
         {
             if (!isPathClear(piece, targetPosition, chessAction))
                 return false;
+
+            if (isKingUnderCheck(piece, targetPosition, chessSide))
+            {
+                Console.WriteLine("Invalid move: Your king (is / will be) in check!");
+                return false;
+            }
 
             return MakeChessPieceStep(piece, targetPosition);
         }
@@ -133,9 +139,9 @@ namespace Chess_Console.Views
             Vector2 startedPosition = piece.PiecePosition;
 
             SetupChessPiece(piece, targetPosition);
-            ClearSquare(startedPosition);
+            ClearField(startedPosition);
 
-            piece.MakeMovement(targetPosition);
+            piece.SetPosition(targetPosition);
 
             return true;
         }
@@ -148,7 +154,7 @@ namespace Chess_Console.Views
                 return false;
 
             Vector2 kingPosition = kingPositionResult.Value;
-            ChessSide attackingSide = (sideUnderAttack == ChessSide.Player) ? ChessSide.Enemy : ChessSide.Player;
+            ChessSide attackingSide = sideUnderAttack.GetOpposite();
 
             for (int y = 0; y < _boardHeight; y++)
             {
@@ -164,11 +170,6 @@ namespace Chess_Console.Views
                 }
             }
 
-            return false;
-        }
-
-        public bool ValidateCheckmate(ChessSide sideUnderAttack)
-        {
             return false;
         }
 
@@ -217,7 +218,7 @@ namespace Chess_Console.Views
             _board[position.Y, position.X] = piece;
         }
 
-        private void ClearSquare(Vector2 position)
+        private void ClearField(Vector2 position)
         {
             SetupChessPiece(null, position);
         }
@@ -233,11 +234,89 @@ namespace Chess_Console.Views
             return targetChessPiece == null ? false : chessPiece.ChessSide != targetChessPiece.ChessSide;
         }
 
-        private bool CheckForInPassingRule()
+        #endregion
+
+        private bool CheckForEnPassant()
         {
             return false;
         }
 
-        #endregion
+        private bool CheckForCastling(ChessSide side)
+        {
+            if (ValidateCheck(side))
+                return false;
+
+            // to do
+
+            return true;
+        }
+
+        public bool ValidateCheckmate(ChessSide sideUnderAttack) //could be improved
+        {
+            if (!ValidateCheck(sideUnderAttack))
+                return false;
+
+            for (int y = 0; y < _boardHeight; y++)
+            {
+                for (int x = 0; x < _boardWidth; x++)
+                {
+                    ChessPiece piece = _board[y, x];
+
+                    if (piece != null && piece.ChessSide == sideUnderAttack)
+                    {
+                        if (CanAnyMoveSaveKing(piece, sideUnderAttack))
+                            return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private bool CanAnyMoveSaveKing(ChessPiece piece, ChessSide side)
+        {
+            for (int y = 0; y < _boardHeight; y++)
+            {
+                for (int x = 0; x < _boardWidth; x++)
+                {
+                    Vector2 target = new Vector2(x, y);
+                    ChessPiece occupant = _board[y, x];
+
+                    if (occupant != null && occupant.ChessSide == side)
+                        continue;
+
+                    bool canPhysicallyMove = occupant == null ? piece.CheckMovement(target) : piece.CheckBeating(target);
+
+                    ChessAction chessAction = occupant == null ? ChessAction.Movement : ChessAction.Beating;
+
+                    if (canPhysicallyMove && isPathClear(piece, target, chessAction))
+                    {
+                        if (!isKingUnderCheck(piece, target, side))
+                            return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private bool isKingUnderCheck(ChessPiece piece, Vector2 targetPosition, ChessSide chessSide)
+        {
+            Vector2 originalPosition = piece.PiecePosition;
+            ChessPiece? targetField = _board[targetPosition.Y, targetPosition.X];
+
+            _board[targetPosition.Y, targetPosition.X] = piece;
+            _board[originalPosition.Y, originalPosition.X] = null;
+
+            piece.SetPosition(targetPosition);
+
+            bool isKingUnderCheck = ValidateCheck(chessSide);
+
+            _board[originalPosition.Y, originalPosition.X] = piece;
+            _board[targetPosition.Y, targetPosition.X] = targetField;
+            piece.SetPosition(originalPosition);
+
+            return isKingUnderCheck;
+        }
     }
 }

@@ -27,11 +27,11 @@ namespace Chess_Console.Pieces.Instances
             _directionBeating = new Vector2[] { new Vector2(1, directionY), new Vector2(-1, directionY) };
         }
 
-        public override void MakeMovement(Vector2 targetPosition)
+        public override void SetPosition(Vector2 targetPosition)
         {
             CountMoves += 1;
 
-            base.MakeMovement(targetPosition);
+            base.SetPosition(targetPosition);
         }
 
         protected override bool CheckDirectionCycle(Vector2[] directionList, Vector2 targetPosition, ChessAction chessAction)

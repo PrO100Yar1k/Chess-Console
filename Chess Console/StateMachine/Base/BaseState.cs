@@ -23,5 +23,8 @@
         protected virtual void SubscribeToEvents() { }
 
         protected virtual void UnSubscribeFromEvents() { }
+
+        public override string ToString()
+            => "\n--- Went to state: " + GetType().Name + " ---";
     }
 }

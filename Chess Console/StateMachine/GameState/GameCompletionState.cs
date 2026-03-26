@@ -36,7 +36,7 @@ namespace Chess_Console.StateMachine.GameState
 
         private void RevealWinner(ChessSide winnerSide)
         {
-            Console.WriteLine($"Match is over! {winnerSide} has won!");
+            Console.WriteLine($"\nMatch is over! {winnerSide} has won!");
         }
     }
 }

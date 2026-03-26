@@ -39,12 +39,11 @@ namespace Chess_Console.StateMachine.Controller
         public void SwitchState<State>() where State : BaseState
         {
             BaseState state = _allStates.FirstOrDefault(s => s is State);
+            Console.WriteLine(state);
 
             _currentState?.Stop();
             _currentState = state;
             _currentState.Start();
-
-            Console.WriteLine(_currentState);
         }
     }
 }
