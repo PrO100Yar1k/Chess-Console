@@ -30,24 +30,24 @@ namespace Chess_Console.Views
 
         private void SetupChessSide(ChessSide chessSide, int mainRow, int pawnRow)
         {
-            GeneratePieces<RookPiece>(chessSide, mainRow, new int[] { 0, 7 });
-            GeneratePieces<KnightPiece>(chessSide, mainRow, new int[] { 1, 6 });
-            GeneratePieces<BishopPiece>(chessSide, mainRow, new int[] { 2, 5 });
+            GeneratePieces(chessSide, mainRow, [0, 7], (pos, s) => new RookPiece(pos, s));
+            GeneratePieces(chessSide, mainRow, [1, 6], (pos, s) => new KnightPiece(pos, s));
+            GeneratePieces(chessSide, mainRow, [2, 5], (pos, s) => new BishopPiece(pos, s));
 
-            GeneratePieces<QueenPiece>(chessSide, mainRow, new int[] { 3 });
-            GeneratePieces<KingPiece>(chessSide, mainRow, new int[] { 4 });
+            GeneratePieces(chessSide, mainRow, [3], (pos, s) => new QueenPiece(pos, s));
+            GeneratePieces(chessSide, mainRow, [4], (pos, s) => new KingPiece(pos, s));
 
             int[] allColumns = Enumerable.Range(0, _boardWidth).ToArray();
-            GeneratePieces<PawnPiece>(chessSide, pawnRow, allColumns);
+            GeneratePieces(chessSide, pawnRow, allColumns, (pos, s) => new PawnPiece(pos, s));
         }
 
-        private void GeneratePieces<T>(ChessSide side, int row, int[] coloumn) where T : ChessPiece
+        private void GeneratePieces<T>(ChessSide side, int row, int[] columns, Func<Vector2, ChessSide, T> factory) where T : ChessPiece
         {
-            foreach (int col in coloumn)
+            foreach (int col in columns)
             {
                 Vector2 position = new Vector2(col, row);
+                T piece = factory(position, side);
 
-                T piece = (T) Activator.CreateInstance(typeof(T), position, side);
                 SetupChessPiece(piece, position);
             }
         }
@@ -55,7 +55,7 @@ namespace Chess_Console.Views
         #endregion
 
         #region Display Board
-        
+
         public void DisplayBoard()
         {
             for (int i = 0; i < _emptySpacesY; i++)
