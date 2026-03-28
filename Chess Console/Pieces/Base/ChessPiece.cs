@@ -11,11 +11,9 @@ namespace Chess_Console.Pieces.Base
         public abstract char ChessPieceChar { get; }
 
         public virtual bool isCanJumpOverPieces { get; } = false;
-
         public readonly ChessSide ChessSide = default;
 
         public Vector2 Position { get; private set; }
-
         public int CountMoves { get; private set; }
 
         #region IDisposable
@@ -39,12 +37,17 @@ namespace Chess_Console.Pieces.Base
             CountMoves += 1;
         }
 
-        public virtual bool CheckMovement(Vector2 targetPosition)
+        public void SetPositionInternal(Vector2 targetPosition)
+        {
+            Position = targetPosition;
+        }
+
+        public bool CheckMovement(Vector2 targetPosition)
         {
             return CheckDirectionCycle(_possibleDirectionMoves, targetPosition, ChessAction.Movement);
         }
 
-        public virtual bool CheckBeating(Vector2 targetPosition)
+        public bool CheckBeating(Vector2 targetPosition)
         {
             return CheckDirectionCycle(_possibleDirectionBeating, targetPosition, ChessAction.Beating);
         }
@@ -70,7 +73,7 @@ namespace Chess_Console.Pieces.Base
             return false;
         }
 
-        public IEnumerable<Vector2> GetMovementPath(Vector2 targetPosition, ChessAction chessAction)
+        public IEnumerable<Vector2> GetMovementPath(Vector2 targetPosition, ChessAction chessAction) // could be improved ?
         {
             Vector2[] directionList = chessAction == ChessAction.Movement ? _possibleDirectionMoves : _possibleDirectionBeating;
 

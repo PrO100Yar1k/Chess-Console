@@ -48,11 +48,17 @@ namespace Chess_Console.StateMachine.GameState
                 if (ValidateCheckMate(ChessSide.Player))
                     break;
 
+                if (_board.ValidateChessStalemate(ChessSide.Player))
+                    break;
+
                 ExecuteTurn(ChessSide.Player, _playerInput);
 
                 // ----------------------------------------------- \\
 
                 if (ValidateCheckMate(ChessSide.Enemy))
+                    break;
+
+                if (_board.ValidateChessStalemate(ChessSide.Enemy))
                     break;
 
                 ExecuteTurn(ChessSide.Enemy, _enemyInput);
@@ -61,19 +67,19 @@ namespace Chess_Console.StateMachine.GameState
             await Task.Delay(50);
         }
 
-        private void ExecuteTurn(ChessSide side, IGeneralInput inputSource)
+        private void ExecuteTurn(ChessSide chessSide, IGeneralInput inputSource)
         {
             while (true)
             {
                 Move movement = inputSource.GetInputMovement();
 
-                if (_board.ValidateMovement(movement.StartPoint, movement.FinalPoint, side))
+                if (_board.ValidateMovement(movement.StartPoint, movement.FinalPoint, chessSide))
                     break;
 
-                Console.WriteLine($"Incorrect input for {side}!!!");
+                Console.WriteLine($"Incorrect input for {chessSide}!!!");
             }
 
-            ChessSide opponent = side.GetOpposite();
+            ChessSide opponent = chessSide.GetOpposite();
 
             if (_board.ValidateCheck(opponent))
             {

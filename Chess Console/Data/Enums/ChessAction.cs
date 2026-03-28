@@ -2,7 +2,9 @@
 {
     internal enum ChessAction
     {
-        Movement, 
-        Beating
+        Movement,
+        Beating,
+        EnPassant,
+        Castling
     }
 }
