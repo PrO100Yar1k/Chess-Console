@@ -14,7 +14,9 @@ namespace Chess_Console.Pieces.Base
 
         public readonly ChessSide ChessSide = default;
 
-        public Vector2 PiecePosition { get; private set; }
+        public Vector2 Position { get; private set; }
+
+        public int CountMoves { get; private set; }
 
         #region IDisposable
 
@@ -27,18 +29,14 @@ namespace Chess_Console.Pieces.Base
 
         public ChessPiece(Vector2 piecePosition, ChessSide chessSide)
         {
-            PiecePosition = piecePosition;
+            Position = piecePosition;
             ChessSide = chessSide;
         }
 
-        protected ChessPiece(Vector2 piecePosition)
+        public void SetPosition(Vector2 targetPosition)
         {
-            PiecePosition = piecePosition;
-        }
-
-        public virtual void SetPosition(Vector2 targetPosition)
-        {
-            PiecePosition = targetPosition;
+            Position = targetPosition;
+            CountMoves += 1;
         }
 
         public virtual bool CheckMovement(Vector2 targetPosition)
@@ -53,7 +51,7 @@ namespace Chess_Console.Pieces.Base
 
         protected virtual bool CheckDirectionCycle(Vector2[] directionList, Vector2 targetPosition, ChessAction chessAction)
         {
-            Vector2 differDirection = targetPosition - PiecePosition;
+            Vector2 differDirection = targetPosition - Position;
 
             if (differDirection.X == 0 && differDirection.Y == 0)
                 return false;
@@ -76,7 +74,7 @@ namespace Chess_Console.Pieces.Base
         {
             Vector2[] directionList = chessAction == ChessAction.Movement ? _possibleDirectionMoves : _possibleDirectionBeating;
 
-            Vector2 differDirection = targetPosition - PiecePosition;
+            Vector2 differDirection = targetPosition - Position;
 
             foreach (Vector2 direction in directionList)
             {
@@ -88,7 +86,7 @@ namespace Chess_Console.Pieces.Base
                     {
                         for (int j = 1; j <= i; j++)
                         {
-                            yield return PiecePosition + new Vector2(direction.X * j, direction.Y * j);
+                            yield return Position + new Vector2(direction.X * j, direction.Y * j);
                         }
 
                         yield break;

@@ -14,10 +14,7 @@ namespace Chess_Console.Pieces.Instances
 
         protected override int _maxDistance => 1;
 
-        public int CountMoves { get; private set; }
-
-        public override char ChessPieceChar
-            => GameConstants.PawnChar;
+        public override char ChessPieceChar => GameConstants.PawnChar;
 
         public PawnPiece(Vector2 piecePosition, ChessSide chessSide) : base(piecePosition, chessSide)
         {
@@ -27,20 +24,13 @@ namespace Chess_Console.Pieces.Instances
             _directionBeating = new Vector2[] { new Vector2(1, directionY), new Vector2(-1, directionY) };
         }
 
-        public override void SetPosition(Vector2 targetPosition)
-        {
-            CountMoves += 1;
-
-            base.SetPosition(targetPosition);
-        }
-
         protected override bool CheckDirectionCycle(Vector2[] directionList, Vector2 targetPosition, ChessAction chessAction)
         {
             if (chessAction == ChessAction.Movement && CountMoves == 0)
             {
                 Vector2 doubleStepDestination = new Vector2(_directionMoves[0].X * 2, _directionMoves[0].Y * 2);
 
-                if (targetPosition - PiecePosition == doubleStepDestination)
+                if (targetPosition - Position == doubleStepDestination)
                     return true;
             }
 

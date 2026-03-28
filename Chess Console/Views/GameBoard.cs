@@ -37,8 +37,7 @@ namespace Chess_Console.Views
             GeneratePieces(chessSide, mainRow, [3], (pos, s) => new QueenPiece(pos, s));
             GeneratePieces(chessSide, mainRow, [4], (pos, s) => new KingPiece(pos, s));
 
-            int[] allColumns = Enumerable.Range(0, _boardWidth).ToArray();
-            GeneratePieces(chessSide, pawnRow, allColumns, (pos, s) => new PawnPiece(pos, s));
+            GeneratePieces(chessSide, pawnRow, Enumerable.Range(0, _boardWidth).ToArray(), (pos, s) => new PawnPiece(pos, s));
         }
 
         private void GeneratePieces<T>(ChessSide side, int row, int[] columns, Func<Vector2, ChessSide, T> factory) where T : ChessPiece
@@ -100,6 +99,7 @@ namespace Chess_Console.Views
         public bool ValidateMovement(Vector2 startPosition, Vector2 targetPosition, ChessSide chessSide)
         {
             ChessPiece chessPiece = _board[startPosition.Y, startPosition.X];
+            ChessPiece targetPiece = _board[targetPosition.Y, targetPosition.X];
 
             if (chessPiece == null)
                 return false;
@@ -107,7 +107,7 @@ namespace Chess_Console.Views
             if (chessPiece.ChessSide != chessSide)
                 return false;
 
-            if (_board[targetPosition.Y, targetPosition.X] == null)
+            if (targetPiece == null)
             {
                 if (chessPiece.CheckMovement(targetPosition))
                     return CheckMovementOverPiece(chessPiece, targetPosition, ChessAction.Movement, chessSide);
@@ -115,6 +115,10 @@ namespace Chess_Console.Views
 
             else if (chessPiece.CheckBeating(targetPosition) && isEnemyChessSide(chessPiece, targetPosition))
                 return CheckMovementOverPiece(chessPiece, targetPosition, ChessAction.Beating, chessSide);
+
+            
+            if (chessPiece is KingPiece && targetPiece is RookPiece)
+                return MakeCastling(targetPiece as RookPiece, chessSide);
 
             return false;
         }
@@ -136,7 +140,7 @@ namespace Chess_Console.Views
 
         public bool MakeChessPieceStep(ChessPiece piece, Vector2 targetPosition)
         {
-            Vector2 startedPosition = piece.PiecePosition;
+            Vector2 startedPosition = piece.Position;
 
             SetupChessPiece(piece, targetPosition);
             ClearField(startedPosition);
@@ -192,7 +196,7 @@ namespace Chess_Console.Views
             return true;
         }
 
-        private Result<Vector2> FindKingPosition(ChessSide targetSide)
+        private Result<Vector2> FindKingPosition(ChessSide targetSide) //
         {
             for (int y = 0; y < _boardHeight; y++)
             {
@@ -207,7 +211,6 @@ namespace Chess_Console.Views
 
             return Result<Vector2>.Failure("The King was not found!");
         }
-
 
         #endregion
 
@@ -241,17 +244,61 @@ namespace Chess_Console.Views
             return false;
         }
 
-        private bool CheckForCastling(ChessSide side)
+        private bool MakeCastling(RookPiece rook, ChessSide chessSide)
         {
-            if (ValidateCheck(side))
+            var kingPiece = GetAllPieceType<KingPiece>().FirstOrDefault(k => k.ChessSide == chessSide);
+
+            int direction = rook.Position.X > kingPiece.Position.X ? 1 : -1;
+            int distance = GetDistanceFromPieceToPiece(kingPiece, rook);
+
+            if (!IsPathEmpty(kingPiece.Position, rook.Position))
                 return false;
 
-            // to do
+            if (IsKingPathUnderAttack(kingPiece.Position, direction, chessSide))
+                return false;
+
+            return ExecuteCastling(kingPiece, rook, direction);
+        }
+
+        private bool IsPathEmpty(Vector2 kingPos, Vector2 rookPos)
+        {
+            int startX = Math.Min(kingPos.X, rookPos.X) + 1;
+            int endX = Math.Max(kingPos.X, rookPos.X);
+
+            for (int x = startX; x < endX; x++)
+            {
+                if (_board[kingPos.Y, x] != null)
+                    return false;
+            }
 
             return true;
         }
 
-        public bool ValidateCheckmate(ChessSide sideUnderAttack) //could be improved
+        private bool IsKingPathUnderAttack(Vector2 kingPos, int direction, ChessSide side)
+        {
+            for (int i = 1; i <= 2; i++)
+            {
+                Vector2 checkPos = new Vector2(kingPos.X + (i * direction), kingPos.Y);
+
+                if (IsFieldUnderAttack(checkPos, side))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private bool ExecuteCastling(KingPiece king, RookPiece rook, int direction)
+        {
+            Vector2 newKingPos = new Vector2(king.Position.X + (2 * direction), king.Position.Y);
+            Vector2 newRookPos = new Vector2(newKingPos.X - direction, king.Position.Y);
+
+            MakeChessPieceStep(king, newKingPos);
+            MakeChessPieceStep(rook, newRookPos);
+
+            return true;
+        }
+
+        public bool ValidateCheckmate(ChessSide sideUnderAttack)
         {
             if (!ValidateCheck(sideUnderAttack))
                 return false;
@@ -302,7 +349,7 @@ namespace Chess_Console.Views
 
         private bool isKingUnderCheck(ChessPiece piece, Vector2 targetPosition, ChessSide chessSide)
         {
-            Vector2 originalPosition = piece.PiecePosition;
+            Vector2 originalPosition = piece.Position;
             ChessPiece? targetField = _board[targetPosition.Y, targetPosition.X];
 
             _board[targetPosition.Y, targetPosition.X] = piece;
@@ -317,6 +364,43 @@ namespace Chess_Console.Views
             piece.SetPosition(originalPosition);
 
             return isKingUnderCheck;
+        }
+
+        public bool IsFieldUnderAttack(Vector2 fieldPosition, ChessSide sideUnderAttack)
+        {
+            ChessSide enemySide = sideUnderAttack.GetOpposite();
+
+            for (int y = 0; y < _boardHeight; y++)
+            {
+                for (int x = 0; x < _boardWidth; x++)
+                {
+                    ChessPiece piece = _board[y, x];
+
+                    if (piece != null && piece.ChessSide == enemySide)
+                    {
+                        if (piece.CheckBeating(fieldPosition) && isPathClear(piece, fieldPosition, ChessAction.Beating))
+                            return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private int GetDistanceFromPieceToPiece(ChessPiece chessPiece_1, ChessPiece chessPiece_2)
+        {
+            Vector2 chessPiecePosition_1 = chessPiece_1.Position;
+            Vector2 chessPiecePosition_2 = chessPiece_2.Position;
+
+            int dx = (int) MathF.Abs(chessPiecePosition_2.X - chessPiecePosition_1.X);
+            int dy = (int) MathF.Abs(chessPiecePosition_2.Y - chessPiecePosition_1.Y);
+
+            return Math.Max(dx, dy);
+        }
+
+        private IEnumerable<T> GetAllPieceType<T>() where T : ChessPiece
+        {
+            return _board.Cast<ChessPiece>().OfType<T>();
         }
     }
 }

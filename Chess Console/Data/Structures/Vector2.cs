@@ -9,32 +9,32 @@
         Y = initialPosY;
     }
 
-    public static Vector2 operator +(Vector2 a, Vector2 b)
+    public static Vector2 operator + (Vector2 a, Vector2 b)
     {
         return new Vector2(a.X + b.X, a.Y + b.Y);
     }
 
-    public static Vector2 operator -(Vector2 a, Vector2 b)
+    public static Vector2 operator - (Vector2 a, Vector2 b)
     {
         return new Vector2(a.X - b.X, a.Y - b.Y);
     }
 
-    public static Vector2 operator *(Vector2 a, Vector2 b)
+    public static Vector2 operator * (Vector2 a, Vector2 b)
     {
         return new Vector2(a.X * b.X, a.Y * b.Y);
     }
 
-    public static Vector2 operator /(Vector2 a, Vector2 b)
+    public static Vector2 operator / (Vector2 a, Vector2 b)
     {
         return new Vector2(a.X / b.X, a.Y / b.Y);
     }
 
-    public static bool operator ==(Vector2 a, Vector2 b)
+    public static bool operator == (Vector2 a, Vector2 b)
     {
         return a.X == b.X && a.Y == b.Y;
     }
 
-    public static bool operator !=(Vector2 a, Vector2 b)
+    public static bool operator != (Vector2 a, Vector2 b)
     {
         return !(a.X == b.X && a.Y == b.Y);
     }
