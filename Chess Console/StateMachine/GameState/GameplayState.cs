@@ -2,6 +2,7 @@
 using Chess_Console.Inputs;
 using Chess_Console.Others;
 using Chess_Console.Views;
+using System.ComponentModel;
 
 namespace Chess_Console.StateMachine.GameState
 {
@@ -67,26 +68,32 @@ namespace Chess_Console.StateMachine.GameState
             await Task.Delay(50);
         }
 
+        private bool ValidateGameCompletion()
+        {
+            return false;
+        }
+
         private void ExecuteTurn(ChessSide chessSide, IGeneralInput inputSource)
         {
             while (true)
             {
                 Move movement = inputSource.GetInputMovement();
 
-                if (_board.ValidateMovement(movement.StartPoint, movement.FinalPoint, chessSide))
+                var validateResult = _board.ValidateMovement(movement.StartPoint, movement.FinalPoint, chessSide);
+
+                if (validateResult.IsSuccess)
+                {
+                    validateResult.Value.Invoke();
                     break;
+                }
 
-                Console.WriteLine($"Incorrect input for {chessSide}!!!");
+                else Console.WriteLine(validateResult.Error);
             }
 
-            ChessSide opponent = chessSide.GetOpposite();
+            ChessSide opponentSide = chessSide.GetOpposite();
 
-            if (_board.ValidateCheck(opponent))
-            {
-                string message = opponent == ChessSide.Enemy ? "Nice! Enemy have check!" : "Warning! You have check!";
-
-                Console.WriteLine(message);
-            }
+            if (_board.ValidateCheck(opponentSide))
+                Console.WriteLine(GetCheckMessage(opponentSide));
 
             _board.DisplayBoard();
         }
@@ -100,6 +107,11 @@ namespace Chess_Console.StateMachine.GameState
             GameEvents.Instance.GameCompletion(side);
 
             return true;
+        }
+
+        private string GetCheckMessage(ChessSide opponent)
+        {
+            return opponent == ChessSide.Enemy ? "Nice! Enemy have check!" : "Warning! You have check!";
         }
 
         private void DisplayMovement(Move movement)

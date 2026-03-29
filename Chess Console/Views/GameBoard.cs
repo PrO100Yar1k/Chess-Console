@@ -15,7 +15,7 @@ namespace Chess_Console.Views
         private const int _emptySpacesY = 1;
         private const int _emptySpacesX = 4;
 
-        private ChessPiece? _enPassantPieceTarget = null;
+        private PawnPiece? _enPassantPieceTarget = null;
 
         #region Board Initialization
 
@@ -98,65 +98,59 @@ namespace Chess_Console.Views
 
         #region Step Validation
 
-        public bool ValidateMovement(Vector2 startPosition, Vector2 targetPosition, ChessSide chessSide)
+        public Result<Action> ValidateMovement(Vector2 startPosition, Vector2 targetPosition, ChessSide chessSide)
         {
             ChessPiece? chessPiece = _board[startPosition.Y, startPosition.X];
             ChessPiece? targetPiece = _board[targetPosition.Y, targetPosition.X];
 
             if (chessPiece == null)
-                return false;
+                return Result<Action>.Failure("Start field is empty!");
 
             if (chessPiece.ChessSide != chessSide)
-                return false;
+                return Result<Action>.Failure("You cannot use enemy piece!");
 
             if (targetPiece == null)
             {
-                if (chessPiece.CheckMovement(targetPosition)) // check movement
+                if (chessPiece.CheckMovement(targetPosition))
                     return CheckMovementOverPiece(chessPiece, targetPosition, ChessAction.Movement, chessSide);
+
+                if (ValidateEnPassant(chessPiece, targetPosition))
+                    return ExecuteEnPassant(chessPiece);
             }
 
-            else if (chessPiece.CheckBeating(targetPosition) && isEnemyChessSide(chessPiece, targetPosition)) // check beating
+            else if (chessPiece.CheckBeating(targetPosition) && isEnemyChessSide(chessPiece, targetPiece))
                 return CheckMovementOverPiece(chessPiece, targetPosition, ChessAction.Beating, chessSide);
 
-            
-            if (chessPiece is KingPiece && targetPiece is RookPiece) // check castling
-                return MakeCastling(targetPiece as RookPiece, chessSide);
+            else if (CheckForCastling(chessPiece, targetPiece))
+                return MakeCastling(chessPiece as KingPiece, targetPiece as RookPiece, chessSide);
 
-            if (CheckForEnPassant(chessPiece)) // check en passant
-                return true;
-
-            return false;
+            return Result<Action>.Failure("Invalid input, please try again!");
         }
 
 
-        public bool CheckMovementOverPiece(ChessPiece piece, Vector2 targetPosition, ChessAction chessAction, ChessSide chessSide)
+        public Result<Action> CheckMovementOverPiece(ChessPiece piece, Vector2 targetPosition, ChessAction chessAction, ChessSide chessSide)
         {
             if (!isPathClear(piece, targetPosition, chessAction))
-                return false;
+                return Result<Action>.Failure("You cannot jump over other pieces!");
 
             if (WouldKingBeUnderCheck(piece, targetPosition, chessSide))
-            {
-                Console.WriteLine("Invalid move: Your king (is / will be) in check!");
-                return false;
-            }
+                return Result<Action>.Failure("Invalid move: Your king (is / will be) in check!");
 
-            return MakeChessPieceStep(piece, targetPosition);
+            return Result<Action>.Success(() => MakeChessPieceStep(piece, targetPosition));
         }
 
-        public bool MakeChessPieceStep(ChessPiece piece, Vector2 targetPosition)
+        public void MakeChessPieceStep(ChessPiece piece, Vector2 targetPosition)
         {
             Vector2 startedPosition = piece.Position;
 
-            MakePossibleSetupEnPassantTarget(piece, startedPosition, targetPosition);
+            ConfigureEnPassantTarget(piece, startedPosition, targetPosition);
 
             SetupChessPiece(piece, targetPosition);
-            ClearField(startedPosition);
+            ClearChessField(startedPosition);
 
             piece.SetPosition(targetPosition);
 
             CheckForPawnPromotion(piece);
-
-            return true;
         }
 
         private bool isPathClear(ChessPiece piece, Vector2 targetPosition, ChessAction chessAction)
@@ -193,7 +187,7 @@ namespace Chess_Console.Views
             _board[position.Y, position.X] = piece;
         }
 
-        private void ClearField(Vector2 position)
+        private void ClearChessField(Vector2 position)
         {
             SetupChessPiece(null, position);
         }
@@ -208,10 +202,9 @@ namespace Chess_Console.Views
             return new Vector2(Math.Abs(difference.X), Math.Abs(difference.Y));
         }
 
-        private bool isEnemyChessSide(ChessPiece chessPiece, Vector2 targetPosition)
+        private bool isEnemyChessSide(ChessPiece chessPiece, ChessPiece targetChessPiece)
         {
-            ChessPiece targetChessPiece = _board[targetPosition.Y, targetPosition.X];
-            return targetChessPiece == null ? false : chessPiece.ChessSide != targetChessPiece.ChessSide;
+            return targetChessPiece != null && chessPiece.ChessSide != targetChessPiece.ChessSide;
         }
 
         private IEnumerable<T> GetAllPieceType<T>() where T : ChessPiece
@@ -354,36 +347,54 @@ namespace Chess_Console.Views
 
         #region Chess Draw
 
+        private bool CheckRepeatStepsDraw()
+        {
+            return false;
+        }
 
+        private bool CheckFiftyStepsDraw()
+        {
+            return false;
+        }
 
         #endregion
 
         #region King Castling
 
-        private bool MakeCastling(RookPiece rook, ChessSide chessSide)
+        private bool CheckForCastling(ChessPiece chessPiece, ChessPiece targetPiece)
         {
-            var kingPiece = GetAllPieceType<KingPiece>().FirstOrDefault(k => k.ChessSide == chessSide);
-
-            int direction = rook.Position.X > kingPiece.Position.X ? 1 : -1;
-            int distance = GetAbsoluteDifferenceBetweenVectors(kingPiece.Position, rook.Position).X;
-
-            if (!isPathForCastlingEmpty(kingPiece.Position, rook.Position))
-                return false;
-
-            if (isKingCastlingPathUnderAttack(kingPiece.Position, direction, chessSide))
-                return false;
-
-            return ExecuteCastling(kingPiece, rook, direction);
+            return chessPiece is KingPiece && targetPiece is RookPiece && chessPiece.ChessSide == targetPiece.ChessSide;
         }
 
-        private bool isPathForCastlingEmpty(Vector2 kingPos, Vector2 rookPos)
+        private Result<Action> MakeCastling(KingPiece king, RookPiece rook, ChessSide chessSide)
+        {
+            int direction = rook.Position.X > king.Position.X ? 1 : -1;
+            int distance = GetAbsoluteDifferenceBetweenVectors(king.Position, rook.Position).X;
+
+            if (!isPathBetweenEmpty(king.Position, rook.Position))
+                return Result<Action>.Failure("Path between king and rook is not empty!");
+
+            if (isKingCastlingPathUnderAttack(king.Position, direction, chessSide))
+                return Result<Action>.Failure("King path is under attack!");
+
+            Vector2 newKingPos = new Vector2(king.Position.X + (2 * direction), king.Position.Y);
+            Vector2 newRookPos = new Vector2(newKingPos.X - direction, king.Position.Y);
+
+            return Result<Action>.Success(() =>
+            {
+                MakeChessPieceStep(king, newKingPos);
+                MakeChessPieceStep(rook, newRookPos);
+            });
+        }
+
+        private bool isPathBetweenEmpty(Vector2 kingPos, Vector2 rookPos)
         {
             int startX = Math.Min(kingPos.X, rookPos.X) + 1;
             int endX = Math.Max(kingPos.X, rookPos.X);
 
-            for (int x = startX; x < endX; x++)
+            for (int X = startX; X < endX; X++)
             {
-                if (_board[kingPos.Y, x] != null)
+                if (_board[kingPos.Y, X] != null)
                     return false;
             }
 
@@ -424,35 +435,22 @@ namespace Chess_Console.Views
             return false;
         }
 
-        private bool ExecuteCastling(KingPiece king, RookPiece rook, int direction)
-        {
-            Vector2 newKingPos = new Vector2(king.Position.X + (2 * direction), king.Position.Y);
-            Vector2 newRookPos = new Vector2(newKingPos.X - direction, king.Position.Y);
-
-            MakeChessPieceStep(king, newKingPos);
-            MakeChessPieceStep(rook, newRookPos);
-
-            return true;
-        }
-
         #endregion
 
         #region En Passant Rule
 
-        private void MakePossibleSetupEnPassantTarget(ChessPiece piece, Vector2 startedPosition, Vector2 targetPosition)
+        private void ConfigureEnPassantTarget(ChessPiece piece, Vector2 startedPosition, Vector2 targetPosition)
         {
             _enPassantPieceTarget = null;
 
             if (piece is PawnPiece && Math.Abs(targetPosition.Y - startedPosition.Y) == 2)
-                _enPassantPieceTarget = piece;
+                _enPassantPieceTarget = piece as PawnPiece;
         }
 
-        private bool CheckForEnPassant(ChessPiece myPiece)
+        private bool ValidateEnPassant(ChessPiece myPiece, Vector2 targetPosition)
         {
             if (myPiece is not PawnPiece || _enPassantPieceTarget == null)
                 return false;
-
-            ChessSide chessSide = myPiece.ChessSide;
 
             Vector2 myPawnPosition = myPiece.Position;
             Vector2 enemyPawnPosition = _enPassantPieceTarget.Position;
@@ -462,21 +460,36 @@ namespace Chess_Console.Views
             if (difference.X != 1 || difference.Y != 0)
                 return false;
 
+            return true;
+        }
+
+        private Result<Action> ExecuteEnPassant(ChessPiece myPiece)
+        {
+            ChessSide chessSide = myPiece.ChessSide;
+
+            Vector2 myPawnPosition = myPiece.Position;
+            Vector2 enemyPawnPosition = _enPassantPieceTarget.Position;
+
             int myPawnPositionY = chessSide == ChessSide.Player ? myPawnPosition.Y - 1 : myPawnPosition.Y + 1;
 
             Vector2 targetPosition = new Vector2(enemyPawnPosition.X, myPawnPositionY);
 
             ChessPiece originalEnemy = _enPassantPieceTarget;
 
-            ClearField(enemyPawnPosition);
+            ClearChessField(enemyPawnPosition);
 
-            if (WouldKingBeUnderCheck(myPiece, targetPosition, chessSide))
+            bool isKingUnderCheck = WouldKingBeUnderCheck(myPiece, targetPosition, chessSide);
+
+            _board[enemyPawnPosition.Y, enemyPawnPosition.X] = originalEnemy;
+
+            if (isKingUnderCheck == true)
+                return Result<Action>.Failure("Your king would be in check!");
+
+            return Result<Action>.Success(() => 
             {
-                _board[enemyPawnPosition.Y, enemyPawnPosition.X] = originalEnemy;
-                return false;
-            }
-
-            return MakeChessPieceStep(myPiece, targetPosition);
+                ClearChessField(enemyPawnPosition);
+                MakeChessPieceStep(myPiece, targetPosition);
+            });
         }
 
         #endregion
