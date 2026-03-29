@@ -1,13 +1,18 @@
-﻿using Chess_Console.Others;
-using Chess_Console.Data.Enums;
+﻿using Chess_Console.Data.Enums;
+using Chess_Console.Others;
 using Chess_Console.Pieces.Base;
 using Chess_Console.Pieces.Instances;
+using System.Text;
 
 namespace Chess_Console.Views
 {
     internal class GameBoard
     {
-        private ChessPiece[,] _board = new ChessPiece[_boardHeight, _boardWidth];
+        private readonly ChessPiece[,] _board = new ChessPiece[_boardHeight, _boardWidth];
+
+        private readonly Dictionary<string, int> _positionHistory = new();
+
+        private PawnPiece? _enPassantPieceTarget = default;
 
         private const int _boardHeight = 8;
         private const int _boardWidth = 8;
@@ -15,7 +20,7 @@ namespace Chess_Console.Views
         private const int _emptySpacesY = 1;
         private const int _emptySpacesX = 4;
 
-        private PawnPiece? _enPassantPieceTarget = null;
+        private int _halfMoveCounter = 0;
 
         #region Board Initialization
 
@@ -175,12 +180,16 @@ namespace Chess_Console.Views
 
             ConfigureEnPassantTarget(piece, startedPosition, targetPosition);
 
+            UpdateFiftyMoveCounter(piece, _board[targetPosition.Y, targetPosition.X] != null);
+
             SetupChessPiece(piece, targetPosition);
             ClearChessField(startedPosition);
 
             piece.SetPosition(targetPosition);
 
             CheckForPawnPromotion(piece);
+
+            RecordPosition(piece.ChessSide);
         }
 
         #endregion
@@ -357,16 +366,57 @@ namespace Chess_Console.Views
 
         #endregion
 
-        #region Chess Draw
+        #region Repeat Steps Draw
 
         public bool ValidateRepeatStepsDraw()
         {
-            return false;
+            return _positionHistory.Values.Any(count => count >= 3);
+        }
+
+        public void RecordPosition(ChessSide chessSide)
+        {
+            string snapshot = GetPositionSnapshot(chessSide);
+
+            if (_positionHistory.ContainsKey(snapshot))
+                _positionHistory[snapshot] += 1;
+            else
+                _positionHistory[snapshot] = 1;
+        }
+
+        private string GetPositionSnapshot(ChessSide chessSide)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            for (int y = 0; y < _boardHeight; y++)
+            {
+                for (int x = 0; x < _boardWidth; x++)
+                {
+                    var piece = _board[y, x];
+                    sb.Append(piece == null ? "." : piece.ChessPieceChar.ToString() + (int) piece.ChessSide);
+                }
+            }
+
+            sb.Append((int) chessSide);
+            sb.Append(_enPassantPieceTarget != null ? _enPassantPieceTarget.Position.ToString() : "none");
+
+            return sb.ToString();
+        }
+
+        #endregion
+
+        #region Fifty Steps No Beating Draw
+
+        public void UpdateFiftyMoveCounter(ChessPiece movingPiece, bool wasCapturing)
+        {
+            if (movingPiece is PawnPiece || wasCapturing)
+                _halfMoveCounter = 0;
+
+            else _halfMoveCounter++;
         }
 
         public bool ValidateFiftyStepsNoBeatingDraw()
         {
-            return false;
+            return _halfMoveCounter >= 100;
         }
 
         #endregion

@@ -1,4 +1,5 @@
 ﻿using Chess_Console.Data.Enums;
+using Chess_Console.Data.Structures;
 
 namespace Chess_Console.Others
 {
@@ -18,9 +19,9 @@ namespace Chess_Console.Others
 
         #endregion
 
-        public event Action<ChessSide> OnGameCompletion;
+        public event Action<GameCompletionResult> OnGameCompletion;
 
-        public void GameCompletion(ChessSide winnerSide)
-            => OnGameCompletion?.Invoke(winnerSide);
+        public void GameCompletion(GameCompletionResult result)
+            => OnGameCompletion?.Invoke(result);
     }
 }

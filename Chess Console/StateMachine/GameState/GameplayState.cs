@@ -2,6 +2,7 @@
 using Chess_Console.Others;
 using Chess_Console.Inputs;
 using Chess_Console.Data.Enums;
+using Chess_Console.Data.Structures;
 
 namespace Chess_Console.StateMachine.GameState
 {
@@ -62,8 +63,10 @@ namespace Chess_Console.StateMachine.GameState
         {
             ChessSide opponentSide = chessSide.GetOpposite();
 
-            if (ValidateGameCompletion(chessSide)) {
-                ExecuteGameCompletion(opponentSide);
+            var gameCompletionResult = ValidateGameCompletion(chessSide);
+
+            if (gameCompletionResult.IsSuccess) { 
+                ExecuteGameCompletion(gameCompletionResult.Value);
                 return false;
             }
 
@@ -109,27 +112,27 @@ namespace Chess_Console.StateMachine.GameState
 
         #region Game Completion
 
-        private bool ValidateGameCompletion(ChessSide chessSide)
+        private Result<GameCompletionResult> ValidateGameCompletion(ChessSide chessSide)
         {
             if (_board.ValidateCheckmate(chessSide))
-                return true;
+                return Result<GameCompletionResult>.Success(new GameCompletionResult($"Checkmate for {chessSide}!", GameCompletionType.Win, chessSide.GetOpposite()));
 
             if (_board.ValidateRepeatStepsDraw())
-                return true;
+                return Result<GameCompletionResult>.Success(new GameCompletionResult($"Threefold repetition of the position for {chessSide.GetOpposite()}!", GameCompletionType.Draw));
 
-            if (_board.ValidateRepeatStepsDraw())
-                return true;
+            if (_board.ValidateFiftyStepsNoBeatingDraw())
+                return Result<GameCompletionResult>.Success(new GameCompletionResult($"Executed 50 Steps without beating!", GameCompletionType.Draw));
 
             if (_board.ValidateChessStalemate(chessSide))
-                return true;
+                return Result<GameCompletionResult>.Success(new GameCompletionResult($"No way! There are no moves for {chessSide}!", GameCompletionType.Stalemate));
 
-            return false;
+            return Result<GameCompletionResult>.Failure("Game continues...");
         }
 
-        private void ExecuteGameCompletion(ChessSide winnerSide)
+        private void ExecuteGameCompletion(GameCompletionResult result)
         {
             _switchable.SwitchState<GameCompletionState>();
-            GameEvents.Instance.GameCompletion(winnerSide);
+            GameEvents.Instance.GameCompletion(result);
         }
 
         #endregion

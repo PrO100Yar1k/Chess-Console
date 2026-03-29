@@ -1,5 +1,6 @@
-﻿using Chess_Console.Data.Enums;
-using Chess_Console.Others;
+﻿using Chess_Console.Others;
+using Chess_Console.Data.Enums;
+using Chess_Console.Data.Structures;
 
 namespace Chess_Console.StateMachine.GameState
 {
@@ -34,9 +35,22 @@ namespace Chess_Console.StateMachine.GameState
             UnSubscribeFromEvents();
         }
 
-        private void RevealWinner(ChessSide winnerSide)
+        private void RevealWinner(GameCompletionResult result)
         {
-            Console.WriteLine($"\nMatch is over! {winnerSide} has won!");
+            string statusMessage = result.Type switch
+            {
+                GameCompletionType.Win or GameCompletionType.Defeat => $"{result.WinnerSide} has dominated the field!",
+                GameCompletionType.Draw => "DRAW! No one could claim victory.",
+                GameCompletionType.Stalemate => "STALEMATE! The game is locked.",
+                _ => "Game Over."
+            };
+
+            Console.WriteLine($"\n{statusMessage}");
+
+            Console.WriteLine($"Reason: {result.Message}");
+
+            if (result.WinnerSide.HasValue)
+                Console.WriteLine($"\nMatch is over! {result.WinnerSide} is the winner!");
         }
     }
 }
