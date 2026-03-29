@@ -62,18 +62,11 @@ namespace Chess_Console.Views
             for (int i = 0; i < _emptySpacesY; i++)
                 Console.WriteLine();
 
-            Console.Write(new string(' ', _emptySpacesX + 3));
-
-            for (int i = 0; i < _boardWidth; i++)
-            {
-                Console.Write($"{i} ");
-            }
-
-            Console.WriteLine("\n" + new string(' ', _emptySpacesX + 2) + new string('-', _boardWidth * 2));
-
             for (int y = 0; y < _boardHeight; y++)
             {
-                Console.Write($"{new string(' ', _emptySpacesX)}{y}| ");
+                int rowNumber = _boardHeight - y;
+
+                Console.Write($"{new string(' ', _emptySpacesX)}{rowNumber}| ");
 
                 for (int x = 0; x < _boardWidth; x++)
                 {
@@ -82,16 +75,31 @@ namespace Chess_Console.Views
                     if (chessPiece != null)
                     {
                         string initialSymbolString = chessPiece.ChessPieceChar.ToString();
-                        char finalSymbol = chessPiece.ChessSide == ChessSide.Player ? initialSymbolString.ToUpper()[0] : initialSymbolString.ToLower()[0];
+
+                        char finalSymbol = chessPiece.ChessSide == ChessSide.Player
+                            ? initialSymbolString.ToUpper()[0]
+                            : initialSymbolString.ToLower()[0];
 
                         Console.Write($"{finalSymbol} ");
                     }
-
-                    else Console.Write($"{GameConstants.EmptyChar} ");
+                    else
+                    {
+                        Console.Write($"{GameConstants.EmptyChar} ");
+                    }
                 }
 
                 Console.WriteLine();
             }
+
+            Console.WriteLine(new string(' ', _emptySpacesX + 2) + new string('-', _boardWidth * 2));
+            Console.Write(new string(' ', _emptySpacesX + 3));
+
+            for (int i = 0; i < _boardWidth; i++)
+            {
+                Console.Write($"{(char) ('a' + i)} ");
+            }
+
+            Console.WriteLine();
         }
 
         #endregion
@@ -127,8 +135,7 @@ namespace Chess_Console.Views
             return Result<Action>.Failure("Invalid input, please try again!");
         }
 
-
-        public Result<Action> CheckMovementOverPiece(ChessPiece piece, Vector2 targetPosition, ChessAction chessAction, ChessSide chessSide)
+        private Result<Action> CheckMovementOverPiece(ChessPiece piece, Vector2 targetPosition, ChessAction chessAction, ChessSide chessSide)
         {
             if (!isPathClear(piece, targetPosition, chessAction))
                 return Result<Action>.Failure("You cannot jump over other pieces!");
@@ -137,20 +144,6 @@ namespace Chess_Console.Views
                 return Result<Action>.Failure("Invalid move: Your king (is / will be) in check!");
 
             return Result<Action>.Success(() => MakeChessPieceStep(piece, targetPosition));
-        }
-
-        public void MakeChessPieceStep(ChessPiece piece, Vector2 targetPosition)
-        {
-            Vector2 startedPosition = piece.Position;
-
-            ConfigureEnPassantTarget(piece, startedPosition, targetPosition);
-
-            SetupChessPiece(piece, targetPosition);
-            ClearChessField(startedPosition);
-
-            piece.SetPosition(targetPosition);
-
-            CheckForPawnPromotion(piece);
         }
 
         private bool isPathClear(ChessPiece piece, Vector2 targetPosition, ChessAction chessAction)
@@ -176,11 +169,23 @@ namespace Chess_Console.Views
 
         #region Making Step
 
-        // to do
+        private void MakeChessPieceStep(ChessPiece piece, Vector2 targetPosition)
+        {
+            Vector2 startedPosition = piece.Position;
+
+            ConfigureEnPassantTarget(piece, startedPosition, targetPosition);
+
+            SetupChessPiece(piece, targetPosition);
+            ClearChessField(startedPosition);
+
+            piece.SetPosition(targetPosition);
+
+            CheckForPawnPromotion(piece);
+        }
 
         #endregion
 
-        #region Setup Board
+        #region Board Interaction
 
         private void SetupChessPiece(ChessPiece piece, Vector2 position)
         {
@@ -194,7 +199,7 @@ namespace Chess_Console.Views
 
         #endregion
 
-        #region Extra Functions
+        #region Helper Methods
 
         private Vector2 GetAbsoluteDifferenceBetweenVectors(Vector2 firstPosition, Vector2 secondPosition)
         {
@@ -214,26 +219,7 @@ namespace Chess_Console.Views
 
         #endregion
 
-        private bool WouldKingBeUnderCheck(ChessPiece piece, Vector2 targetPosition, ChessSide chessSide)
-        {
-            Vector2 originalPosition = piece.Position;
-            ChessPiece? targetPieceField = _board[targetPosition.Y, targetPosition.X];
-
-            _board[targetPosition.Y, targetPosition.X] = piece;
-            _board[originalPosition.Y, originalPosition.X] = null;
-
-            piece.SetPositionInternal(targetPosition);
-
-            bool isKingUnderCheck = ValidateCheck(chessSide);
-
-            _board[originalPosition.Y, originalPosition.X] = piece;
-            _board[targetPosition.Y, targetPosition.X] = targetPieceField;
-
-            piece.SetPositionInternal(originalPosition);
-
-            return isKingUnderCheck;
-        }
-
+        #region Check Any Piece Movement
 
         private bool CanPieceMoveAnywhere(ChessPiece piece)
         {
@@ -263,6 +249,32 @@ namespace Chess_Console.Views
 
             return false;
         }
+
+        #endregion
+
+        #region Simulating
+
+        private bool WouldKingBeUnderCheck(ChessPiece piece, Vector2 targetPosition, ChessSide chessSide)
+        {
+            Vector2 originalPosition = piece.Position;
+            ChessPiece? targetPieceField = _board[targetPosition.Y, targetPosition.X];
+
+            _board[targetPosition.Y, targetPosition.X] = piece;
+            _board[originalPosition.Y, originalPosition.X] = null;
+
+            piece.SetPositionInternal(targetPosition);
+
+            bool isKingUnderCheck = ValidateCheck(chessSide);
+
+            _board[originalPosition.Y, originalPosition.X] = piece;
+            _board[targetPosition.Y, targetPosition.X] = targetPieceField;
+
+            piece.SetPositionInternal(originalPosition);
+
+            return isKingUnderCheck;
+        }
+
+        #endregion
 
         #region Check
 
@@ -347,12 +359,12 @@ namespace Chess_Console.Views
 
         #region Chess Draw
 
-        private bool CheckRepeatStepsDraw()
+        public bool ValidateRepeatStepsDraw()
         {
             return false;
         }
 
-        private bool CheckFiftyStepsDraw()
+        public bool ValidateFiftyStepsNoBeatingDraw()
         {
             return false;
         }
@@ -414,7 +426,7 @@ namespace Chess_Console.Views
             return false;
         }
 
-        public bool isFieldUnderAttack(Vector2 fieldPosition, ChessSide sideUnderAttack)
+        private bool isFieldUnderAttack(Vector2 fieldPosition, ChessSide sideUnderAttack)
         {
             ChessSide enemySide = sideUnderAttack.GetOpposite();
 

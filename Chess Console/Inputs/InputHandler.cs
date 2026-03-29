@@ -37,10 +37,10 @@ namespace Chess_Console.Inputs
             if (file < 'a' || file > 'h' || rank < '1' || rank > '8')
                 return Result<Vector2>.Failure("Position out of board range");
 
-            int col = file - 'a';
-            int row = 8 - (rank - '0');
+            int row = file - 'a';
+            int col = 8 - (rank - '0');
 
-            return Result<Vector2>.Success(new Vector2(col, row));
+            return Result<Vector2>.Success(new Vector2(row, col));
         }
     }
 }

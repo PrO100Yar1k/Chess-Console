@@ -4,7 +4,5 @@
     {
         Movement,
         Beating,
-        EnPassant,
-        Castling
     }
 }

@@ -54,47 +54,45 @@ namespace Chess_Console.Pieces.Base
 
         protected virtual bool CheckDirectionCycle(Vector2[] directionList, Vector2 targetPosition, ChessAction chessAction)
         {
-            Vector2 differDirection = targetPosition - Position;
+            Vector2 diff = targetPosition - Position;
 
-            if (differDirection.X == 0 && differDirection.Y == 0)
+            if (diff.X == 0 && diff.Y == 0)
                 return false;
 
-            foreach (Vector2 direction in directionList)
-            {
-                for (int i = 0; i <= _maxDistance; i++)
-                {
-                    Vector2 targetDestination = new Vector2(direction.X * i, direction.Y * i);
+            int stepX = Math.Sign(diff.X);
+            int stepY = Math.Sign(diff.Y);
 
-                    if (differDirection == targetDestination)
-                        return true;
-                }
+            Vector2 actualDirection = new Vector2(stepX, stepY);
+
+            int actualDistance = Math.Max(Math.Abs(diff.X), Math.Abs(diff.Y));
+
+            if (actualDistance > _maxDistance)
+                return false;
+
+            if (diff.X != stepX * actualDistance || diff.Y != stepY * actualDistance)
+                return false;
+
+            foreach (Vector2 allowedDir in directionList)
+            {
+                if (allowedDir.X == stepX && allowedDir.Y == stepY)
+                    return true;
             }
 
             return false;
         }
 
-        public IEnumerable<Vector2> GetMovementPath(Vector2 targetPosition, ChessAction chessAction) // could be improved ?
+        public IEnumerable<Vector2> GetMovementPath(Vector2 targetPosition, ChessAction chessAction)
         {
-            Vector2[] directionList = chessAction == ChessAction.Movement ? _possibleDirectionMoves : _possibleDirectionBeating;
+            Vector2 diff = targetPosition - Position;
 
-            Vector2 differDirection = targetPosition - Position;
+            int stepX = Math.Sign(diff.X);
+            int stepY = Math.Sign(diff.Y);
 
-            foreach (Vector2 direction in directionList)
+            int distance = Math.Max(Math.Abs(diff.X), Math.Abs(diff.Y));
+
+            for (int i = 1; i <= distance; i++)
             {
-                for (int i = 1; i <= _maxDistance; i++)
-                {
-                    Vector2 currentStep = new Vector2(direction.X * i, direction.Y * i);
-
-                    if (differDirection == currentStep)
-                    {
-                        for (int j = 1; j <= i; j++)
-                        {
-                            yield return Position + new Vector2(direction.X * j, direction.Y * j);
-                        }
-
-                        yield break;
-                    }
-                }
+                yield return new Vector2(Position.X + stepX * i, Position.Y + stepY * i);
             }
         }
     }

@@ -1,8 +1,7 @@
-﻿using Chess_Console.Data.Enums;
-using Chess_Console.Inputs;
+﻿using Chess_Console.Views;
 using Chess_Console.Others;
-using Chess_Console.Views;
-using System.ComponentModel;
+using Chess_Console.Inputs;
+using Chess_Console.Data.Enums;
 
 namespace Chess_Console.StateMachine.GameState
 {
@@ -40,40 +39,46 @@ namespace Chess_Console.StateMachine.GameState
             _cancellationTokenSource.Cancel();
         }
 
-        private async Task GameplayLoop(CancellationToken token) // to do
+        private async Task GameplayLoop(CancellationToken token)
         {
             _board.DisplayBoard();
 
             while (!token.IsCancellationRequested)
             {
-                if (ValidateCheckMate(ChessSide.Player))
+                if (!ExecuteTurn(ChessSide.Player, _playerInput, token))
                     break;
 
-                if (_board.ValidateChessStalemate(ChessSide.Player))
+                if (token.IsCancellationRequested)
                     break;
 
-                ExecuteTurn(ChessSide.Player, _playerInput);
-
-                // ----------------------------------------------- \\
-
-                if (ValidateCheckMate(ChessSide.Enemy))
+                if (!ExecuteTurn(ChessSide.Enemy, _enemyInput, token))
                     break;
-
-                if (_board.ValidateChessStalemate(ChessSide.Enemy))
-                    break;
-
-                ExecuteTurn(ChessSide.Enemy, _enemyInput);
             }
 
             await Task.Delay(50);
         }
 
-        private bool ValidateGameCompletion()
+        private bool ExecuteTurn(ChessSide chessSide, IGeneralInput inputSource, CancellationToken token)
         {
-            return false;
+            ChessSide opponentSide = chessSide.GetOpposite();
+
+            if (ValidateGameCompletion(chessSide)) {
+                ExecuteGameCompletion(opponentSide);
+                return false;
+            }
+
+            if (token.IsCancellationRequested)
+                return false;
+
+            var movement = ValidateMovement(chessSide, inputSource);
+            ExecuteMovement(chessSide, movement.Value);
+
+            return true;
         }
 
-        private void ExecuteTurn(ChessSide chessSide, IGeneralInput inputSource)
+        #region Movement Validation & Execution
+
+        private Result<Action> ValidateMovement(ChessSide chessSide, IGeneralInput inputSource)
         {
             while (true)
             {
@@ -82,13 +87,15 @@ namespace Chess_Console.StateMachine.GameState
                 var validateResult = _board.ValidateMovement(movement.StartPoint, movement.FinalPoint, chessSide);
 
                 if (validateResult.IsSuccess)
-                {
-                    validateResult.Value.Invoke();
-                    break;
-                }
+                    return validateResult;
 
-                else Console.WriteLine(validateResult.Error);
+                Console.WriteLine(validateResult.Error);
             }
+        }
+
+        private void ExecuteMovement(ChessSide chessSide, Action movementAction)
+        {
+            movementAction.Invoke();
 
             ChessSide opponentSide = chessSide.GetOpposite();
 
@@ -98,29 +105,52 @@ namespace Chess_Console.StateMachine.GameState
             _board.DisplayBoard();
         }
 
-        private bool ValidateCheckMate(ChessSide side)
+        #endregion
+
+        #region Game Completion
+
+        private bool ValidateGameCompletion(ChessSide chessSide)
         {
-            if (!_board.ValidateCheckmate(side))
-                return false;
+            if (_board.ValidateCheckmate(chessSide))
+                return true;
 
-            _switchable.SwitchState<GameCompletionState>();
-            GameEvents.Instance.GameCompletion(side);
+            if (_board.ValidateRepeatStepsDraw())
+                return true;
 
-            return true;
+            if (_board.ValidateRepeatStepsDraw())
+                return true;
+
+            if (_board.ValidateChessStalemate(chessSide))
+                return true;
+
+            return false;
         }
+
+        private void ExecuteGameCompletion(ChessSide winnerSide)
+        {
+            _switchable.SwitchState<GameCompletionState>();
+            GameEvents.Instance.GameCompletion(winnerSide);
+        }
+
+        #endregion
+
+        #region Display Coordinates of Executed Movement
+
+        private void DisplayCoordinatesOfMovement(Move movement)
+        {
+            Console.WriteLine($"Start Point: {movement.StartPoint}");
+            Console.WriteLine($"Final Point: {movement.FinalPoint}");
+        }
+
+        #endregion
+
+        #region Helper Methods
 
         private string GetCheckMessage(ChessSide opponent)
         {
             return opponent == ChessSide.Enemy ? "Nice! Enemy have check!" : "Warning! You have check!";
         }
 
-        private void DisplayMovement(Move movement)
-        {
-            Console.WriteLine($"Start Point: {movement.StartPoint}");
-            Console.WriteLine($"Final Point: {movement.FinalPoint}");
-
-            //Console.WriteLine($"From: {movement.StartPoint.X} {movement.StartPoint.Y}");
-            //Console.WriteLine($"To: {movement.FinalPoint.X} {movement.FinalPoint.Y}");
-        }
+        #endregion
     }
 }

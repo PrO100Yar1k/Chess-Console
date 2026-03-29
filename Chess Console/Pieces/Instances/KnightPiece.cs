@@ -30,5 +30,26 @@ namespace Chess_Console.Pieces.Instances
         {
 
         }
+
+        protected override bool CheckDirectionCycle(Vector2[] directionList, Vector2 targetPosition, ChessAction chessAction)
+        {
+            Vector2 differDirection = targetPosition - Position;
+
+            if (differDirection.X == 0 && differDirection.Y == 0)
+                return false;
+
+            foreach (Vector2 direction in directionList)
+            {
+                for (int i = 0; i <= _maxDistance; i++)
+                {
+                    Vector2 targetDestination = new Vector2(direction.X * i, direction.Y * i);
+
+                    if (differDirection == targetDestination)
+                        return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

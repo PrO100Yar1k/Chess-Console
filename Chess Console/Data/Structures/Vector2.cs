@@ -44,19 +44,24 @@
         return !(a.X == b.X && a.Y == b.Y);
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
-        throw new NotImplementedException(); //
+        return obj is Vector2 other && Equals(other);
+    }
+
+    public bool Equals(Vector2 other)
+    {
+        return X == other.X && Y == other.Y;
     }
 
     public override int GetHashCode()
     {
-        throw new NotImplementedException(); //
+        return HashCode.Combine(X, Y);
     }
 
     public override string ToString()
     {
-        return $"PosX: {X}; PosY: {Y}";
+        return $"Pos X: {X}; Pos Y: {Y}";
     }
 }
 
