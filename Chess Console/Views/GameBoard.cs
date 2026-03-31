@@ -37,14 +37,14 @@ namespace Chess_Console.Views
 
         private void SetupChessSide(ChessSide chessSide, int mainRow, int pawnRow)
         {
-            //GeneratePieces(chessSide, mainRow, [0, 7], (pos, s) => new RookPiece(pos, s));
+            GeneratePieces(chessSide, mainRow, [0, 7], (pos, s) => new RookPiece(pos, s));
             GeneratePieces(chessSide, mainRow, [1, 6], (pos, s) => new KnightPiece(pos, s));
-            //GeneratePieces(chessSide, mainRow, [2, 5], (pos, s) => new BishopPiece(pos, s));
+            GeneratePieces(chessSide, mainRow, [2, 5], (pos, s) => new BishopPiece(pos, s));
 
-            //GeneratePieces(chessSide, mainRow, [3], (pos, s) => new QueenPiece(pos, s));
+            GeneratePieces(chessSide, mainRow, [3], (pos, s) => new QueenPiece(pos, s));
             GeneratePieces(chessSide, mainRow, [4], (pos, s) => new KingPiece(pos, s));
 
-            //GeneratePieces(chessSide, pawnRow, Enumerable.Range(0, 8).ToArray(), (pos, s) => new PawnPiece(pos, s));
+            GeneratePieces(chessSide, pawnRow, Enumerable.Range(0, 8).ToArray(), (pos, s) => new PawnPiece(pos, s));
         }
 
         private void GeneratePieces<T>(ChessSide side, int row, int[] columns, Func<Vector2, ChessSide, T> factory) where T : ChessPiece
