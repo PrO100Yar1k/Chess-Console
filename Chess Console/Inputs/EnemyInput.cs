@@ -1,5 +1,4 @@
-﻿
-namespace Chess_Console.Inputs
+﻿namespace Chess_Console.Inputs
 {
     internal class EnemyInput : IGeneralInput
     {

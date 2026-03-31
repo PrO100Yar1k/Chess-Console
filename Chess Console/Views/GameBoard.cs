@@ -1,8 +1,8 @@
-﻿using Chess_Console.Data.Enums;
+﻿using System.Text;
 using Chess_Console.Others;
+using Chess_Console.Data.Enums;
 using Chess_Console.Pieces.Base;
 using Chess_Console.Pieces.Instances;
-using System.Text;
 
 namespace Chess_Console.Views
 {
@@ -37,14 +37,14 @@ namespace Chess_Console.Views
 
         private void SetupChessSide(ChessSide chessSide, int mainRow, int pawnRow)
         {
-            GeneratePieces(chessSide, mainRow, [0, 7], (pos, s) => new RookPiece(pos, s));
+            //GeneratePieces(chessSide, mainRow, [0, 7], (pos, s) => new RookPiece(pos, s));
             GeneratePieces(chessSide, mainRow, [1, 6], (pos, s) => new KnightPiece(pos, s));
-            GeneratePieces(chessSide, mainRow, [2, 5], (pos, s) => new BishopPiece(pos, s));
+            //GeneratePieces(chessSide, mainRow, [2, 5], (pos, s) => new BishopPiece(pos, s));
 
-            GeneratePieces(chessSide, mainRow, [3], (pos, s) => new QueenPiece(pos, s));
+            //GeneratePieces(chessSide, mainRow, [3], (pos, s) => new QueenPiece(pos, s));
             GeneratePieces(chessSide, mainRow, [4], (pos, s) => new KingPiece(pos, s));
 
-            GeneratePieces(chessSide, pawnRow, Enumerable.Range(0, 8).ToArray(), (pos, s) => new PawnPiece(pos, s));
+            //GeneratePieces(chessSide, pawnRow, Enumerable.Range(0, 8).ToArray(), (pos, s) => new PawnPiece(pos, s));
         }
 
         private void GeneratePieces<T>(ChessSide side, int row, int[] columns, Func<Vector2, ChessSide, T> factory) where T : ChessPiece
@@ -101,7 +101,7 @@ namespace Chess_Console.Views
 
             for (int i = 0; i < _boardWidth; i++)
             {
-                Console.Write($"{(char) ('a' + i)} ");
+                Console.Write($"{(char)('a' + i)} ");
             }
 
             Console.WriteLine();
@@ -392,11 +392,11 @@ namespace Chess_Console.Views
                 for (int x = 0; x < _boardWidth; x++)
                 {
                     var piece = _board[y, x];
-                    sb.Append(piece == null ? "." : piece.ChessPieceChar.ToString() + (int) piece.ChessSide);
+                    sb.Append(piece == null ? "." : piece.ChessPieceChar.ToString() + (int)piece.ChessSide);
                 }
             }
 
-            sb.Append((int) chessSide);
+            sb.Append((int)chessSide);
             sb.Append(_enPassantPieceTarget != null ? _enPassantPieceTarget.Position.ToString() : "none");
 
             return sb.ToString();
@@ -547,7 +547,7 @@ namespace Chess_Console.Views
             if (isKingUnderCheck == true)
                 return Result<Action>.Failure("Your king would be in check!");
 
-            return Result<Action>.Success(() => 
+            return Result<Action>.Success(() =>
             {
                 ClearChessField(enemyPawnPosition);
                 MakeChessPieceStep(myPiece, targetPosition);
@@ -577,10 +577,64 @@ namespace Chess_Console.Views
                     "R" => new RookPiece(piece.Position, piece.ChessSide),
                     "B" => new BishopPiece(piece.Position, piece.ChessSide),
                     "K" => new KnightPiece(piece.Position, piece.ChessSide),
-                     _  => new QueenPiece(piece.Position, piece.ChessSide)
+                    _ => new QueenPiece(piece.Position, piece.ChessSide)
                 };
 
                 _board[piece.Position.Y, piece.Position.X] = newPiece;
+            }
+        }
+
+        #endregion
+
+        #region Insufficient Material
+
+        public bool ValidateInsufficientMaterial()
+        {
+            var activePieces = GetActivePieces().ToList();
+
+            if (activePieces.Any(p => p is PawnPiece or RookPiece or QueenPiece))
+                return false;
+
+            int whiteMaterial = activePieces.Where(p => p.ChessSide == ChessSide.Player).Sum(p => p.PieceValue);
+            int blackMaterial = activePieces.Where(p => p.ChessSide == ChessSide.Enemy).Sum(p => p.PieceValue);
+
+            if (whiteMaterial <= 3 && blackMaterial <= 3)
+            {
+                if (whiteMaterial == 3 && blackMaterial == 3)
+                {
+                    var bishops = activePieces.OfType<BishopPiece>().ToList();
+
+                    if (bishops.Count == 2)
+                        return AreBishopsOnSameColor(bishops);
+
+                    return true;
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool AreBishopsOnSameColor(List<BishopPiece> bishops)
+        {
+            Vector2 pos1 = bishops[0].Position;
+            Vector2 pos2 = bishops[1].Position;
+
+            return (pos1.X + pos1.Y) % 2 == (pos2.X + pos2.Y) % 2;
+        }
+
+        private IEnumerable<ChessPiece> GetActivePieces()
+        {
+            for (int y = 0; y < _boardHeight; y++)
+            {
+                for (int x = 0; x < _boardWidth; x++)
+                {
+                    ChessPiece currentPiece = _board[y, x];
+
+                    if (currentPiece != null)
+                        yield return currentPiece;
+                }
             }
         }
 

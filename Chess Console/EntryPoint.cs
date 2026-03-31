@@ -1,5 +1,6 @@
-﻿using Chess_Console.StateMachine.Controller;
+﻿using Chess_Console.StateMachine;
 using Chess_Console.StateMachine.GameState;
+using Chess_Console.StateMachine.Controller;
 
 namespace Chess_Console
 {
@@ -7,7 +8,7 @@ namespace Chess_Console
     {
         private static void Main()
         {
-            GameStateController gameStateController = new GameStateController();
+            ISwitchableState gameStateController = new GameStateController();
             gameStateController.SwitchState<GameplayState>();
         }
     }

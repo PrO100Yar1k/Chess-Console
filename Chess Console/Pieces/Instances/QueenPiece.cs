@@ -1,5 +1,5 @@
-﻿using Chess_Console.Data.Enums;
-using Chess_Console.Others;
+﻿using Chess_Console.Others;
+using Chess_Console.Data.Enums;
 using Chess_Console.Pieces.Base;
 
 namespace Chess_Console.Pieces.Instances
@@ -20,9 +20,12 @@ namespace Chess_Console.Pieces.Instances
 
         protected override Vector2[] _possibleDirectionBeating => _possibleDirectionMoves;
 
-        public override char ChessPieceChar => GameConstants.QueenChar;
-
         protected override int _maxDistance => 7;
+
+        public override char ChessPieceChar
+            => GameConstants.QueenChar;
+
+        public override int PieceValue => 9;
 
         public QueenPiece(Vector2 piecePosition, ChessSide chessSide) : base(piecePosition, chessSide)
         {

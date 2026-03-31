@@ -2,7 +2,7 @@
 
 namespace Chess_Console.Inputs
 {
-    internal class InputHandler : IInputHandler
+    internal class PlayerInputHandler : IInputHandler
     {
         public Result<Move> ParseMove(string input)
         {

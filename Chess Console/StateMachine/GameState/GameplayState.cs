@@ -22,10 +22,10 @@ namespace Chess_Console.StateMachine.GameState
         {
             _board = new GameBoard();
 
-            _playerInputHandler = new InputHandler();
+            _playerInputHandler = new PlayerInputHandler();
             _playerInput = new PlayerInput(_playerInputHandler);
 
-            _enemyInputHandler = new InputHandler(); //
+            _enemyInputHandler = new PlayerInputHandler(); //
             _enemyInput = new PlayerInput(_enemyInputHandler); //
         }
 
@@ -122,6 +122,9 @@ namespace Chess_Console.StateMachine.GameState
 
             if (_board.ValidateFiftyStepsNoBeatingDraw())
                 return Result<GameCompletionResult>.Success(new GameCompletionResult($"Executed 50 Steps without beating!", GameCompletionType.Draw));
+
+            if (_board.ValidateInsufficientMaterial())
+                return Result<GameCompletionResult>.Success(new GameCompletionResult($"There are no enough pieces to make checkmate!", GameCompletionType.Draw));
 
             if (_board.ValidateChessStalemate(chessSide))
                 return Result<GameCompletionResult>.Success(new GameCompletionResult($"No way! There are no moves for {chessSide}!", GameCompletionType.Stalemate));

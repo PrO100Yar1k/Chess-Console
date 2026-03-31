@@ -14,7 +14,10 @@ namespace Chess_Console.Pieces.Instances
 
         protected override int _maxDistance => 1;
 
-        public override char ChessPieceChar => GameConstants.PawnChar;
+        public override char ChessPieceChar
+            => GameConstants.PawnChar;
+
+        public override int PieceValue => 1;
 
         public PawnPiece(Vector2 piecePosition, ChessSide chessSide) : base(piecePosition, chessSide)
         {

@@ -15,9 +15,12 @@ namespace Chess_Console.Pieces.Instances
 
         protected override Vector2[] _possibleDirectionBeating => _possibleDirectionMoves;
 
-        public override char ChessPieceChar => GameConstants.BishopChar;
-
         protected override int _maxDistance => 7;
+
+        public override char ChessPieceChar
+            => GameConstants.BishopChar;
+
+        public override int PieceValue => 3;
 
         public BishopPiece(Vector2 piecePosition, ChessSide chessSide) : base(piecePosition, chessSide)
         {

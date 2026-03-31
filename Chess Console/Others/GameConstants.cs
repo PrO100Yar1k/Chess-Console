@@ -11,8 +11,8 @@
         public const char PawnChar = 'P';
         public const char EmptyChar = '.';
 
-        public static readonly string Backline = new string(new char[] {
+        public static readonly string Backline = new string([ //
             RookChar, KnightChar, BishopChar, QueenChar, KingChar, BishopChar, KnightChar, RookChar
-        });
+        ]);
     }
 }

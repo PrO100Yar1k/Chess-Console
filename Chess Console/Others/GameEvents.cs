@@ -1,5 +1,4 @@
-﻿using Chess_Console.Data.Enums;
-using Chess_Console.Data.Structures;
+﻿using Chess_Console.Data.Structures;
 
 namespace Chess_Console.Others
 {

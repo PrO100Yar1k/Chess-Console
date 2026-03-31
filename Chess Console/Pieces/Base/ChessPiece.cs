@@ -8,10 +8,12 @@ namespace Chess_Console.Pieces.Base
         protected abstract Vector2[] _possibleDirectionBeating { get; }
 
         protected abstract int _maxDistance { get; }
-        public abstract char ChessPieceChar { get; }
 
-        public virtual bool isCanJumpOverPieces { get; } = false;
+        public abstract char ChessPieceChar { get; }
+        public abstract int PieceValue { get; }
+
         public readonly ChessSide ChessSide = default;
+        public virtual bool isCanJumpOverPieces { get; }
 
         public Vector2 Position { get; private set; }
         public int CountMoves { get; private set; }
