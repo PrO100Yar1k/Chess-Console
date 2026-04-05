@@ -1,4 +1,4 @@
-﻿using Chess_Console.Data.Structures;
+﻿using Chess_Console.Core.Common.Structures;
 
 namespace Chess_Console.Infrastructure.Common
 {

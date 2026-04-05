@@ -1,6 +1,6 @@
 ﻿using Chess_Console.Core.Pieces.Base;
-using Chess_Console.Data.Enums;
-using Chess_Console.Pieces.Instances;
+using Chess_Console.Core.Common.Enums;
+using Chess_Console.Core.Pieces.Instances;
 
 namespace Chess_Console.Core.Board
 {
@@ -63,12 +63,33 @@ namespace Chess_Console.Core.Board
 
         public void SetupChessPiece(Vector2 position, ChessPiece piece)
         {
+            if (!CheckCoordinates(position))
+                return;
+
             _board[position.Y, position.X] = piece;
         }
 
         public void ClearChessField(Vector2 position)
         {
+            if (!CheckCoordinates(position))
+                return;
+
             _board[position.Y, position.X] = null;
+        }
+
+        #endregion
+
+        #region Helper Methods
+
+        public bool CheckCoordinates(Vector2 position)
+        {
+            if (position.X < 0 || position.X >= _boardWidth)
+                return false;
+
+            if (position.Y < 0 || position.Y >= _boardHeight)
+                return false;
+
+            return true;
         }
 
         #endregion

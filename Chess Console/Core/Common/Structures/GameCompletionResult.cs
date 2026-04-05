@@ -1,6 +1,6 @@
-﻿using Chess_Console.Data.Enums;
+﻿using Chess_Console.Core.Common.Enums;
 
-namespace Chess_Console.Data.Structures
+namespace Chess_Console.Core.Common.Structures
 {
     internal struct GameCompletionResult
     {

@@ -1,4 +1,4 @@
-﻿using Chess_Console.Data.Enums;
+﻿using Chess_Console.Core.Common.Enums;
 
 namespace Chess_Console.Infrastructure.Common
 {

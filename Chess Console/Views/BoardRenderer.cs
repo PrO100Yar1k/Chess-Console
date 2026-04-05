@@ -1,6 +1,6 @@
-﻿using Chess_Console.Data.Enums;
-using Chess_Console.Core.Board;
+﻿using Chess_Console.Core.Board;
 using Chess_Console.Core.Pieces.Base;
+using Chess_Console.Core.Common.Enums;
 using Chess_Console.Infrastructure.Common;
 
 namespace Chess_Console.Views

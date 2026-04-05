@@ -1,11 +1,10 @@
 ﻿using System.Text;
 using Chess_Console.Views;
-using Chess_Console.Data.Enums;
-using Chess_Console.Controllers;
 using Chess_Console.Core.Pieces.Base;
 using Chess_Console.Core.Pieces.Instances;
 using Chess_Console.Infrastructure.Common;
 using Chess_Console.Core.Board;
+using Chess_Console.Core.Common.Enums;
 
 namespace Chess_Console.Core.Rules
 {

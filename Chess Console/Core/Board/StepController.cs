@@ -1,8 +1,7 @@
 ﻿using Chess_Console.Core.Rules;
 using Chess_Console.Core.Pieces.Base;
-using Chess_Console.Core.Board;
 
-namespace Chess_Console.Controllers
+namespace Chess_Console.Core.Board
 {
     internal class StepController
     {

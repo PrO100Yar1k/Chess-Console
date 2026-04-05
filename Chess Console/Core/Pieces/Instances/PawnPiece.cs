@@ -1,6 +1,6 @@
-﻿using Chess_Console.Data.Enums;
-using Chess_Console.Core.Pieces.Base;
+﻿using Chess_Console.Core.Pieces.Base;
 using Chess_Console.Infrastructure.Common;
+using Chess_Console.Core.Common.Enums;
 
 namespace Chess_Console.Core.Pieces.Instances
 {
@@ -23,15 +23,15 @@ namespace Chess_Console.Core.Pieces.Instances
         {
             int directionY = chessSide == ChessSide.Player ? -1 : 1;
 
-            _directionMoves = new Vector2[] { new Vector2(0, directionY) };
-            _directionBeating = new Vector2[] { new Vector2(1, directionY), new Vector2(-1, directionY) };
+            _directionMoves = [ new Vector2(0, directionY) ];
+            _directionBeating = [ new Vector2(1, directionY), new Vector2(-1, directionY) ];
         }
 
         protected override bool CheckDirectionCycle(Vector2[] directionList, Vector2 targetPosition, ChessAction chessAction)
         {
             if (chessAction == ChessAction.Movement && CountMoves == 0)
             {
-                Vector2 doubleStepDestination = new Vector2(_directionMoves[0].X * 2, _directionMoves[0].Y * 2);
+                Vector2 doubleStepDestination = new Vector2(_directionMoves[0].X, _directionMoves[0].Y * 2);
 
                 if (targetPosition - Position == doubleStepDestination)
                     return true;

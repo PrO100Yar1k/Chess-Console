@@ -1,6 +1,6 @@
-﻿using Chess_Console.Data.Enums;
-using Chess_Console.Core.Pieces.Base;
+﻿using Chess_Console.Core.Pieces.Base;
 using Chess_Console.Infrastructure.Common;
+using Chess_Console.Core.Common.Enums;
 
 namespace Chess_Console.Core.Pieces.Instances
 {

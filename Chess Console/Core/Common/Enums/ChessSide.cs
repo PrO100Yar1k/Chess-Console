@@ -1,4 +1,4 @@
-﻿namespace Chess_Console.Data.Enums
+﻿namespace Chess_Console.Core.Common.Enums
 {
     internal enum ChessSide
     {
