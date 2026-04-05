@@ -54,7 +54,7 @@ namespace Chess_Console.Views
                 Vector2 position = new Vector2(col, row);
                 T piece = factory(position, side);
 
-                SetupChessPiece(piece, position);
+                SetupChessPiece(position, piece);
             }
         }
 
@@ -75,7 +75,9 @@ namespace Chess_Console.Views
 
                 for (int x = 0; x < _boardWidth; x++)
                 {
-                    ChessPiece chessPiece = _board[y, x];
+                    Vector2 targetPosition = new Vector2(x, y);
+
+                    ChessPiece chessPiece = GetBoardField(targetPosition);
 
                     if (chessPiece != null)
                     {
@@ -113,8 +115,8 @@ namespace Chess_Console.Views
 
         public Result<Action> ValidateMovement(Vector2 startPosition, Vector2 targetPosition, ChessSide chessSide)
         {
-            ChessPiece? chessPiece = _board[startPosition.Y, startPosition.X];
-            ChessPiece? targetPiece = _board[targetPosition.Y, targetPosition.X];
+            ChessPiece? chessPiece = GetBoardField(startPosition);
+            ChessPiece? targetPiece = GetBoardField(targetPosition);
 
             if (chessPiece == null)
                 return Result<Action>.Failure("Start field is empty!");
@@ -163,7 +165,7 @@ namespace Chess_Console.Views
                 if (currentPosition == targetPosition)
                     continue;
 
-                if (_board[currentPosition.Y, currentPosition.X] != null)
+                if (GetBoardField(currentPosition) != null)
                     return false;
             }
 
@@ -178,11 +180,13 @@ namespace Chess_Console.Views
         {
             Vector2 startedPosition = piece.Position;
 
+            bool willCapturing = GetBoardField(targetPosition) != null;
+
             ConfigureEnPassantTarget(piece, startedPosition, targetPosition);
 
-            UpdateFiftyMoveCounter(piece, _board[targetPosition.Y, targetPosition.X] != null);
+            UpdateFiftyMoveCounter(piece, willCapturing);
 
-            SetupChessPiece(piece, targetPosition);
+            SetupChessPiece(targetPosition, piece);
             ClearChessField(startedPosition);
 
             piece.SetPosition(targetPosition);
@@ -196,14 +200,19 @@ namespace Chess_Console.Views
 
         #region Board Interaction
 
-        private void SetupChessPiece(ChessPiece piece, Vector2 position)
+        public ChessPiece GetBoardField(Vector2 position)
+        {
+            return _board[position.Y, position.X];
+        }
+
+        public void SetupChessPiece(Vector2 position, ChessPiece piece)
         {
             _board[position.Y, position.X] = piece;
         }
 
-        private void ClearChessField(Vector2 position)
+        public void ClearChessField(Vector2 position)
         {
-            SetupChessPiece(null, position);
+            _board[position.Y, position.X] = null;
         }
 
         #endregion
@@ -238,19 +247,19 @@ namespace Chess_Console.Views
             {
                 for (int x = 0; x < _boardWidth; x++)
                 {
-                    Vector2 target = new Vector2(x, y);
-                    ChessPiece occupant = _board[y, x];
+                    Vector2 targetPosition = new Vector2(x, y);
+                    ChessPiece occupant = GetBoardField(targetPosition);
 
                     if (occupant != null && occupant.ChessSide == side)
                         continue;
 
-                    bool canPhysicallyMove = occupant == null ? piece.CheckMovement(target) : piece.CheckBeating(target);
+                    bool canPhysicallyMove = occupant == null ? piece.CheckMovement(targetPosition) : piece.CheckBeating(targetPosition);
 
                     ChessAction chessAction = occupant == null ? ChessAction.Movement : ChessAction.Beating;
 
-                    if (canPhysicallyMove && isPathClear(piece, target, chessAction))
+                    if (canPhysicallyMove && isPathClear(piece, targetPosition, chessAction))
                     {
-                        if (!WouldKingBeUnderCheck(piece, target, side))
+                        if (!WouldKingBeUnderCheck(piece, targetPosition, side))
                             return true;
                     }
                 }
@@ -266,17 +275,17 @@ namespace Chess_Console.Views
         private bool WouldKingBeUnderCheck(ChessPiece piece, Vector2 targetPosition, ChessSide chessSide)
         {
             Vector2 originalPosition = piece.Position;
-            ChessPiece? targetPieceField = _board[targetPosition.Y, targetPosition.X];
+            ChessPiece? targetPieceField = GetBoardField(targetPosition);
 
-            _board[targetPosition.Y, targetPosition.X] = piece;
-            _board[originalPosition.Y, originalPosition.X] = null;
+            SetupChessPiece(targetPosition, piece);
+            ClearChessField(originalPosition);
 
             piece.SetPositionInternal(targetPosition);
 
             bool isKingUnderCheck = ValidateCheck(chessSide);
 
-            _board[originalPosition.Y, originalPosition.X] = piece;
-            _board[targetPosition.Y, targetPosition.X] = targetPieceField;
+            SetupChessPiece(originalPosition, piece);
+            SetupChessPiece(targetPosition, targetPieceField);
 
             piece.SetPositionInternal(originalPosition);
 
@@ -299,7 +308,8 @@ namespace Chess_Console.Views
             {
                 for (int x = 0; x < _boardWidth; x++)
                 {
-                    ChessPiece piece = _board[y, x];
+                    Vector2 targetPosition = new Vector2(x, y);
+                    ChessPiece piece = GetBoardField(targetPosition);
 
                     if (piece != null && piece.ChessSide == attackingSide)
                     {
@@ -325,7 +335,8 @@ namespace Chess_Console.Views
             {
                 for (int x = 0; x < _boardWidth; x++)
                 {
-                    ChessPiece piece = _board[y, x];
+                    Vector2 targetPosition = new Vector2(x, y);
+                    ChessPiece piece = GetBoardField(targetPosition);
 
                     if (piece != null && piece.ChessSide == sideUnderAttack)
                     {
@@ -351,7 +362,8 @@ namespace Chess_Console.Views
             {
                 for (int x = 0; x < _boardWidth; x++)
                 {
-                    ChessPiece piece = _board[y, x];
+                    Vector2 targetPosition = new Vector2(x, y);
+                    ChessPiece piece = GetBoardField(targetPosition);
 
                     if (piece != null && piece.ChessSide == sideUnderAttack)
                     {
@@ -391,12 +403,14 @@ namespace Chess_Console.Views
             {
                 for (int x = 0; x < _boardWidth; x++)
                 {
-                    var piece = _board[y, x];
-                    sb.Append(piece == null ? "." : piece.ChessPieceChar.ToString() + (int)piece.ChessSide);
+                    Vector2 targetPosition = new Vector2(x, y);
+                    var piece = GetBoardField(targetPosition);
+
+                    sb.Append(piece == null ? "." : piece.ChessPieceChar.ToString() + (int) piece.ChessSide);
                 }
             }
 
-            sb.Append((int)chessSide);
+            sb.Append((int) chessSide);
             sb.Append(_enPassantPieceTarget != null ? _enPassantPieceTarget.Position.ToString() : "none");
 
             return sb.ToString();
@@ -454,9 +468,11 @@ namespace Chess_Console.Views
             int startX = Math.Min(kingPos.X, rookPos.X) + 1;
             int endX = Math.Max(kingPos.X, rookPos.X);
 
-            for (int X = startX; X < endX; X++)
+            for (int PosX = startX; PosX < endX; PosX++)
             {
-                if (_board[kingPos.Y, X] != null)
+                Vector2 targetPosition = new Vector2(PosX, kingPos.Y);
+
+                if (GetBoardField(targetPosition) != null)
                     return false;
             }
 
@@ -484,7 +500,8 @@ namespace Chess_Console.Views
             {
                 for (int x = 0; x < _boardWidth; x++)
                 {
-                    ChessPiece piece = _board[y, x];
+                    Vector2 targetPosition = new Vector2(x, y);
+                    ChessPiece piece = GetBoardField(targetPosition);
 
                     if (piece != null && piece.ChessSide == enemySide)
                     {
@@ -542,7 +559,7 @@ namespace Chess_Console.Views
 
             bool isKingUnderCheck = WouldKingBeUnderCheck(myPiece, targetPosition, chessSide);
 
-            _board[enemyPawnPosition.Y, enemyPawnPosition.X] = originalEnemy;
+            SetupChessPiece(enemyPawnPosition, originalEnemy);
 
             if (isKingUnderCheck == true)
                 return Result<Action>.Failure("Your king would be in check!");
@@ -570,17 +587,17 @@ namespace Chess_Console.Views
                 DisplayView.WriteLine("\n--- PAWN PROMOTION! ---");
                 DisplayView.WriteLine("Choose a piece: [Q]ueen, [R]ook, [B]ishop, [K]night");
 
-                string input = Console.ReadLine()?.ToUpper() ?? "Q";
+                string input = DisplayView.ReadLine()?.ToUpper() ?? "Q";
 
                 ChessPiece newPiece = input switch
                 {
                     "R" => new RookPiece(piece.Position, piece.ChessSide),
                     "B" => new BishopPiece(piece.Position, piece.ChessSide),
                     "K" => new KnightPiece(piece.Position, piece.ChessSide),
-                    _ => new QueenPiece(piece.Position, piece.ChessSide)
+                     _  => new QueenPiece(piece.Position, piece.ChessSide)
                 };
 
-                _board[piece.Position.Y, piece.Position.X] = newPiece;
+                SetupChessPiece(piece.Position, newPiece);
             }
         }
 
@@ -630,7 +647,8 @@ namespace Chess_Console.Views
             {
                 for (int x = 0; x < _boardWidth; x++)
                 {
-                    ChessPiece currentPiece = _board[y, x];
+                    Vector2 targetPosition = new Vector2(x, y);
+                    ChessPiece currentPiece = GetBoardField(targetPosition);
 
                     if (currentPiece != null)
                         yield return currentPiece;

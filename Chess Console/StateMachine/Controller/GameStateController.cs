@@ -1,12 +1,12 @@
-﻿using Chess_Console.StateMachine.GameState;
-using Chess_Console.Views;
+﻿using Chess_Console.Views;
+using Chess_Console.StateMachine.GameState;
 
 namespace Chess_Console.StateMachine.Controller
 {
     internal class GameStateController : ISwitchableState, IDisposable
     {
-        private List<BaseState> _allStates = default;
-        private BaseState _currentState = default;
+        private List<BaseState> _allStates;
+        private BaseState _currentState;
 
         #region IDisposable
 
