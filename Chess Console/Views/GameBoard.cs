@@ -65,13 +65,13 @@ namespace Chess_Console.Views
         public void DisplayBoard()
         {
             for (int i = 0; i < _emptySpacesY; i++)
-                Console.WriteLine();
+                DisplayView.WriteLine();
 
             for (int y = 0; y < _boardHeight; y++)
             {
                 int rowNumber = _boardHeight - y;
 
-                Console.Write($"{new string(' ', _emptySpacesX)}{rowNumber}| ");
+                DisplayView.Write($"{new string(' ', _emptySpacesX)}{rowNumber}| ");
 
                 for (int x = 0; x < _boardWidth; x++)
                 {
@@ -85,26 +85,26 @@ namespace Chess_Console.Views
                             ? initialSymbolString.ToUpper()[0]
                             : initialSymbolString.ToLower()[0];
 
-                        Console.Write($"{finalSymbol} ");
+                        DisplayView.Write($"{finalSymbol} ");
                     }
                     else
                     {
-                        Console.Write($"{GameConstants.EmptyChar} ");
+                        DisplayView.Write($"{GameConstants.EmptyChar} ");
                     }
                 }
 
-                Console.WriteLine();
+                DisplayView.WriteLine();
             }
 
-            Console.WriteLine(new string(' ', _emptySpacesX + 2) + new string('-', _boardWidth * 2));
-            Console.Write(new string(' ', _emptySpacesX + 3));
+            DisplayView.WriteLine(new string(' ', _emptySpacesX + 2) + new string('-', _boardWidth * 2));
+            DisplayView.Write(new string(' ', _emptySpacesX + 3));
 
             for (int i = 0; i < _boardWidth; i++)
             {
-                Console.Write($"{(char)('a' + i)} ");
+                DisplayView.Write($"{(char)('a' + i)} ");
             }
 
-            Console.WriteLine();
+            DisplayView.WriteLine();
         }
 
         #endregion
@@ -567,8 +567,8 @@ namespace Chess_Console.Views
 
             if (piece.Position.Y == promotionRow)
             {
-                Console.WriteLine("\n--- PAWN PROMOTION! ---");
-                Console.WriteLine("Choose a piece: [Q]ueen, [R]ook, [B]ishop, [K]night");
+                DisplayView.WriteLine("\n--- PAWN PROMOTION! ---");
+                DisplayView.WriteLine("Choose a piece: [Q]ueen, [R]ook, [B]ishop, [K]night");
 
                 string input = Console.ReadLine()?.ToUpper() ?? "Q";
 

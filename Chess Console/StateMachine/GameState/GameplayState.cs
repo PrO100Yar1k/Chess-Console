@@ -92,7 +92,7 @@ namespace Chess_Console.StateMachine.GameState
                 if (validateResult.IsSuccess)
                     return validateResult;
 
-                Console.WriteLine(validateResult.Error);
+                DisplayView.WriteLine(validateResult.Error);
             }
         }
 
@@ -103,7 +103,7 @@ namespace Chess_Console.StateMachine.GameState
             ChessSide opponentSide = chessSide.GetOpposite();
 
             if (_board.ValidateCheck(opponentSide))
-                Console.WriteLine(GetCheckMessage(opponentSide));
+                DisplayView.WriteLine(GetCheckMessage(opponentSide));
 
             _board.DisplayBoard();
         }
@@ -144,8 +144,8 @@ namespace Chess_Console.StateMachine.GameState
 
         private void DisplayCoordinatesOfMovement(Move movement)
         {
-            Console.WriteLine($"Start Point: {movement.StartPoint}");
-            Console.WriteLine($"Final Point: {movement.FinalPoint}");
+            DisplayView.WriteLine($"Start Point: {movement.StartPoint}");
+            DisplayView.WriteLine($"Final Point: {movement.FinalPoint}");
         }
 
         #endregion

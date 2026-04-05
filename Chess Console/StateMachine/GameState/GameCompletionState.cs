@@ -1,6 +1,7 @@
-﻿using Chess_Console.Others;
-using Chess_Console.Data.Enums;
+﻿using Chess_Console.Data.Enums;
 using Chess_Console.Data.Structures;
+using Chess_Console.Others;
+using Chess_Console.Views;
 
 namespace Chess_Console.StateMachine.GameState
 {
@@ -45,9 +46,9 @@ namespace Chess_Console.StateMachine.GameState
                 _ => "Game Over."
             };
 
-            Console.WriteLine($"\n{statusMessage}");
+            DisplayView.WriteLine($"\n{statusMessage}");
 
-            Console.WriteLine($"Reason: {result.Message}");
+            DisplayView.WriteLine($"Reason: {result.Message}");
 
             if (result.WinnerSide.HasValue)
                 Console.WriteLine($"\nMatch is over! {result.WinnerSide} is the winner!");

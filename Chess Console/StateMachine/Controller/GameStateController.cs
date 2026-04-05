@@ -1,4 +1,5 @@
 ﻿using Chess_Console.StateMachine.GameState;
+using Chess_Console.Views;
 
 namespace Chess_Console.StateMachine.Controller
 {
@@ -39,7 +40,7 @@ namespace Chess_Console.StateMachine.Controller
         public void SwitchState<State>() where State : BaseState
         {
             BaseState state = _allStates.FirstOrDefault(s => s is State);
-            Console.WriteLine(state);
+            DisplayView.WriteLine($"{state}");
 
             _currentState?.Stop();
             _currentState = state;

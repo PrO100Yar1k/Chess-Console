@@ -1,4 +1,6 @@
-﻿namespace Chess_Console.Inputs
+﻿using Chess_Console.Views;
+
+namespace Chess_Console.Inputs
 {
     internal class PlayerInput : IGeneralInput
     {
@@ -13,15 +15,14 @@
         {
             while (true)
             {
-                Console.WriteLine("\nEnter your movement (for example, e2 e3):");
+                DisplayView.WriteLine("\nEnter your movement (for example, e2 e3):");
 
-                string input = Console.ReadLine();
-
+                var input = DisplayView.ReadLine();
                 var result = _inputHandler.ParseMove(input);
 
                 if (!result.IsSuccess)
                 {
-                    Console.WriteLine(result.Error);
+                    DisplayView.WriteLine(result.Error);
                     continue;
                 }
 
