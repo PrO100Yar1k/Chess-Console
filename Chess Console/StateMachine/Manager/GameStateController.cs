@@ -1,7 +1,8 @@
 ﻿using Chess_Console.Views;
 using Chess_Console.StateMachine.GameState;
+using Chess_Console.StateMachine.Base;
 
-namespace Chess_Console.StateMachine.Controller
+namespace Chess_Console.StateMachine.Manager
 {
     internal class GameStateController : ISwitchableState, IDisposable
     {

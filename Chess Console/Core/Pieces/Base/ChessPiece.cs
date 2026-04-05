@@ -1,6 +1,6 @@
 ﻿using Chess_Console.Data.Enums;
 
-namespace Chess_Console.Pieces.Base
+namespace Chess_Console.Core.Pieces.Base
 {
     internal abstract class ChessPiece : IDisposable
     {

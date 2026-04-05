@@ -1,4 +1,6 @@
-﻿namespace Chess_Console.StateMachine.GameState
+﻿using Chess_Console.StateMachine.Base;
+
+namespace Chess_Console.StateMachine.GameState
 {
     internal class MainMenuState : BaseState
     {

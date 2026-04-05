@@ -1,4 +1,6 @@
-﻿namespace Chess_Console.Inputs
+﻿using Chess_Console.Infrastructure.Inputs.Interfaces;
+
+namespace Chess_Console.Infrastructure.Inputs.Instances
 {
     internal class EnemyInput : IGeneralInput
     {

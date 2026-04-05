@@ -1,6 +1,7 @@
-﻿using Chess_Console.Others;
+﻿using Chess_Console.Infrastructure.Common;
+using Chess_Console.Infrastructure.Inputs.Interfaces;
 
-namespace Chess_Console.Inputs
+namespace Chess_Console.Infrastructure.Inputs.Handlers
 {
     internal class PlayerInputHandler : IInputHandler
     {

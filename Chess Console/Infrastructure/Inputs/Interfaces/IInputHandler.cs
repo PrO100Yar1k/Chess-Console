@@ -1,6 +1,6 @@
-﻿using Chess_Console.Others;
+﻿using Chess_Console.Infrastructure.Common;
 
-namespace Chess_Console.Inputs
+namespace Chess_Console.Infrastructure.Inputs.Interfaces
 {
     internal interface IInputHandler
     {

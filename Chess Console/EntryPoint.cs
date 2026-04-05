@@ -1,6 +1,6 @@
-﻿using Chess_Console.StateMachine;
+﻿using Chess_Console.StateMachine.Base;
 using Chess_Console.StateMachine.GameState;
-using Chess_Console.StateMachine.Controller;
+using Chess_Console.StateMachine.Manager;
 
 namespace Chess_Console
 {

@@ -1,6 +1,6 @@
 ﻿using Chess_Console.Data.Structures;
 
-namespace Chess_Console.Others
+namespace Chess_Console.Infrastructure.Common
 {
     internal sealed class GameEvents
     {

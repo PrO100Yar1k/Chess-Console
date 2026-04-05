@@ -1,6 +1,7 @@
-﻿using Chess_Console.Views;
+﻿using Chess_Console.Infrastructure.Inputs.Interfaces;
+using Chess_Console.Views;
 
-namespace Chess_Console.Inputs
+namespace Chess_Console.Infrastructure.Inputs.Instances
 {
     internal class PlayerInput : IGeneralInput
     {

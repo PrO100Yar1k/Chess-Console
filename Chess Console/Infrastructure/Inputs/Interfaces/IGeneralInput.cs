@@ -1,4 +1,4 @@
-﻿namespace Chess_Console.Inputs
+﻿namespace Chess_Console.Infrastructure.Inputs.Interfaces
 {
     internal interface IGeneralInput
     {

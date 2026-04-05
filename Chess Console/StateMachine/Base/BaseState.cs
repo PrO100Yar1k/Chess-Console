@@ -1,4 +1,4 @@
-﻿namespace Chess_Console.StateMachine
+﻿namespace Chess_Console.StateMachine.Base
 {
     internal abstract class BaseState : IDisposable
     {

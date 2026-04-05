@@ -1,4 +1,4 @@
-﻿namespace Chess_Console.Others
+﻿namespace Chess_Console.Infrastructure.Common
 {
     internal class Result<T>
     {

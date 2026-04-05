@@ -1,8 +1,8 @@
-﻿using Chess_Console.Others;
-using Chess_Console.Data.Enums;
-using Chess_Console.Pieces.Base;
+﻿using Chess_Console.Data.Enums;
+using Chess_Console.Core.Pieces.Base;
+using Chess_Console.Infrastructure.Common;
 
-namespace Chess_Console.Pieces.Instances
+namespace Chess_Console.Core.Pieces.Instances
 {
     internal class PawnPiece : ChessPiece
     {
@@ -21,7 +21,7 @@ namespace Chess_Console.Pieces.Instances
 
         public PawnPiece(Vector2 piecePosition, ChessSide chessSide) : base(piecePosition, chessSide)
         {
-            int directionY = (chessSide == ChessSide.Player) ? -1 : 1;
+            int directionY = chessSide == ChessSide.Player ? -1 : 1;
 
             _directionMoves = new Vector2[] { new Vector2(0, directionY) };
             _directionBeating = new Vector2[] { new Vector2(1, directionY), new Vector2(-1, directionY) };
