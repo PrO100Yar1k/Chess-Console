@@ -1,13 +1,12 @@
 ﻿using Chess_Console.Views;
-using Chess_Console.Core.Board;
 using Chess_Console.Core.Rules;
 using Chess_Console.Core.Common.Enums;
 using Chess_Console.StateMachine.Base;
-using Chess_Console.Infrastructure.Common;
 using Chess_Console.Core.Common.Structures;
-using Chess_Console.Infrastructure.Inputs.Handlers;
-using Chess_Console.Infrastructure.Inputs.Instances;
+using Chess_Console.Infrastructure.Common;
 using Chess_Console.Infrastructure.Inputs.Interfaces;
+
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Chess_Console.StateMachine.GameState
 {
@@ -16,34 +15,21 @@ namespace Chess_Console.StateMachine.GameState
         private CancellationTokenSource _cancellationTokenSource;
 
         private readonly RulesValidator _rulesValidator;
-        private readonly StepController _stepController;
         private readonly BoardRenderer _boardRenderer;
         private readonly MoveValidator _moveValidator;
-        private readonly BoardModel _boardModel;
-
-        private readonly IInputHandler _playerInputHandler;
-        private readonly IInputHandler _enemyInputHandler;
 
         private readonly IGeneralInput _playerInput;
         private readonly IGeneralInput _enemyInput;
 
-        public GameplayState(ISwitchableState switchable) : base(switchable)
+        public GameplayState(ISwitchableState switchable, BoardRenderer boardRenderer, RulesValidator rulesValidator, MoveValidator moveValidator,
+            [FromKeyedServices("Player Input")] IGeneralInput playerInput, [FromKeyedServices("Player Input")] IGeneralInput enemyInput) : base(switchable) //
         {
-            _boardModel = new BoardModel();
+            _boardRenderer = boardRenderer;
+            _rulesValidator = rulesValidator;
+            _moveValidator = moveValidator;
 
-            _boardRenderer = new BoardRenderer(_boardModel);
-            _rulesValidator = new RulesValidator(_boardModel);
-
-            _stepController = new StepController(_boardModel, _rulesValidator);
-            _moveValidator = new MoveValidator(_boardModel, _rulesValidator, _stepController);
-
-            _rulesValidator.SetStepController(_stepController);
-
-            _playerInputHandler = new PlayerInputHandler();
-            _playerInput = new PlayerInput(_playerInputHandler);
-
-            _enemyInputHandler = new PlayerInputHandler(); //
-            _enemyInput = new PlayerInput(_enemyInputHandler); //
+            _playerInput = playerInput;
+            _enemyInput = enemyInput;
         }
 
         public override void Start()

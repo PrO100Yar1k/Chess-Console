@@ -1,17 +1,16 @@
 ﻿using System.Text;
 using Chess_Console.Views;
+using Chess_Console.Core.Board;
 using Chess_Console.Core.Pieces.Base;
+using Chess_Console.Core.Common.Enums;
 using Chess_Console.Core.Pieces.Instances;
 using Chess_Console.Infrastructure.Common;
-using Chess_Console.Core.Board;
-using Chess_Console.Core.Common.Enums;
 
 namespace Chess_Console.Core.Rules
 {
     internal class RulesValidator
     {
         private readonly Dictionary<string, int> _positionHistory = new();
-
         private PawnPiece? _enPassantPieceTarget;
 
         private readonly BoardModel _boardModel;

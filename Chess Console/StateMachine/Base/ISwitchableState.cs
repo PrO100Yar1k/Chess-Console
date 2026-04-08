@@ -1,7 +1,11 @@
-﻿namespace Chess_Console.StateMachine.Base
+﻿using Chess_Console.Core.Common.Interfaces;
+
+namespace Chess_Console.StateMachine.Base
 {
-    internal interface ISwitchableState
+    internal interface ISwitchableState : IServiceInitializable
     {
-        public void SwitchState<T>() where T : BaseState;
+        public void SwitchState<State>() where State : BaseState;
+
+        public bool CheckStateForActivity<State>() where State : BaseState;
     }
 }

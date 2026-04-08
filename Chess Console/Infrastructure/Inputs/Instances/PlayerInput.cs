@@ -1,5 +1,6 @@
 ﻿using Chess_Console.Infrastructure.Inputs.Interfaces;
 using Chess_Console.Views;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Chess_Console.Infrastructure.Inputs.Instances
 {
@@ -7,7 +8,7 @@ namespace Chess_Console.Infrastructure.Inputs.Instances
     {
         private readonly IInputHandler _inputHandler;
 
-        public PlayerInput(IInputHandler inputHandler)
+        public PlayerInput([FromKeyedServices("Player Input")] IInputHandler inputHandler)
         {
             _inputHandler = inputHandler;
         }

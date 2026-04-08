@@ -1,7 +1,7 @@
-﻿using Chess_Console.Core.Common.Enums;
-using Chess_Console.Core.Common.Structures;
+﻿using Chess_Console.Core.Common.Structures;
 using Chess_Console.Infrastructure.Common;
 using Chess_Console.StateMachine.Base;
+using Chess_Console.Core.Common.Enums;
 using Chess_Console.Views;
 
 namespace Chess_Console.StateMachine.GameState

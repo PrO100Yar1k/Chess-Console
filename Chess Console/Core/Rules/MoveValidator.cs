@@ -1,8 +1,8 @@
 ﻿using Chess_Console.Core.Board;
 using Chess_Console.Core.Pieces.Base;
+using Chess_Console.Core.Common.Enums;
 using Chess_Console.Core.Pieces.Instances;
 using Chess_Console.Infrastructure.Common;
-using Chess_Console.Core.Common.Enums;
 
 namespace Chess_Console.Core.Rules
 {

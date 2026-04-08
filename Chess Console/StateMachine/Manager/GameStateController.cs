@@ -1,12 +1,14 @@
-﻿using Chess_Console.Views;
-using Chess_Console.StateMachine.Base;
+﻿using Chess_Console.StateMachine.Base;
 using Chess_Console.StateMachine.GameState;
+
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Chess_Console.StateMachine.Manager
 {
     internal class GameStateController : ISwitchableState, IDisposable
     {
-        private List<BaseState> _allStates;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly List<BaseState> _allStates;
         private BaseState _currentState;
 
         #region IDisposable
@@ -19,18 +21,17 @@ namespace Chess_Console.StateMachine.Manager
 
         #endregion
 
-        public GameStateController()
+        public GameStateController(IServiceProvider serviceProvider)
         {
-            InitializeStateControllers();
+            _serviceProvider = serviceProvider;
+            _allStates = new List<BaseState>();
         }
 
-        private void InitializeStateControllers()
+        public void InitializeService()
         {
-            _allStates = new List<BaseState>() {
-                new MainMenuState(this),
-                new GameplayState(this),
-                new GameCompletionState(this)
-            };
+            _allStates.Add(_serviceProvider.GetRequiredService<MainMenuState>());
+            _allStates.Add(_serviceProvider.GetRequiredService<GameplayState>());
+            _allStates.Add(_serviceProvider.GetRequiredService<GameCompletionState>());
         }
 
         public bool CheckStateForActivity<State>() where State : BaseState
@@ -38,10 +39,9 @@ namespace Chess_Console.StateMachine.Manager
             return _currentState == _allStates.FirstOrDefault(s => s is State);
         }
 
-        public void SwitchState<State>() where State : BaseState
+        public void SwitchState<TState>() where TState : BaseState
         {
-            BaseState state = _allStates.FirstOrDefault(s => s is State);
-            DisplayView.WriteLine($"{state}");
+            var state = _serviceProvider.GetRequiredService<TState>();
 
             _currentState?.Stop();
             _currentState = state;

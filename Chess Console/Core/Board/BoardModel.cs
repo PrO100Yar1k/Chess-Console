@@ -1,24 +1,27 @@
 ﻿using Chess_Console.Core.Pieces.Base;
 using Chess_Console.Core.Common.Enums;
+using Chess_Console.Core.Common.Interfaces;
 using Chess_Console.Core.Pieces.Instances;
 
 namespace Chess_Console.Core.Board
 {
-    internal class BoardModel
+    internal class BoardModel : IServiceInitializable
     {
         private readonly ChessPiece[,] _board = new ChessPiece[_boardHeight, _boardWidth];
+
+        private readonly IPieceFactory _pieceFactory;
 
         public const int _boardHeight = 8;
         public const int _boardWidth = 8;
 
         #region Board Initialization
 
-        public BoardModel()
+        public BoardModel(IPieceFactory pieceFactory)
         {
-            InitializeChessPieces();
+            _pieceFactory = pieceFactory;
         }
 
-        private void InitializeChessPieces()
+        public void InitializeService()
         {
             SetupChessSide(ChessSide.Enemy, 0, 1);
             SetupChessSide(ChessSide.Player, _boardHeight - 1, _boardHeight - 2);
@@ -26,22 +29,22 @@ namespace Chess_Console.Core.Board
 
         private void SetupChessSide(ChessSide chessSide, int mainRow, int pawnRow)
         {
-            GeneratePieces(chessSide, mainRow, [0, 7], (pos, s) => new RookPiece(pos, s));
-            GeneratePieces(chessSide, mainRow, [1, 6], (pos, s) => new KnightPiece(pos, s));
-            GeneratePieces(chessSide, mainRow, [2, 5], (pos, s) => new BishopPiece(pos, s));
+            GeneratePieces<RookPiece>(chessSide, mainRow, [0, 7]);
+            GeneratePieces<KnightPiece>(chessSide, mainRow, [1, 6]);
+            GeneratePieces<BishopPiece>(chessSide, mainRow, [2, 5]);
 
-            GeneratePieces(chessSide, mainRow, [3], (pos, s) => new QueenPiece(pos, s));
-            GeneratePieces(chessSide, mainRow, [4], (pos, s) => new KingPiece(pos, s));
+            GeneratePieces<QueenPiece>(chessSide, mainRow, [3]);
+            GeneratePieces<KingPiece>(chessSide, mainRow, [4]);
 
-            GeneratePieces(chessSide, pawnRow, Enumerable.Range(0, 8).ToArray(), (pos, s) => new PawnPiece(pos, s));
+            GeneratePieces<PawnPiece>(chessSide, pawnRow, Enumerable.Range(0, 8).ToArray());
         }
 
-        private void GeneratePieces<T>(ChessSide side, int row, int[] columns, Func<Vector2, ChessSide, T> factory) where T : ChessPiece
+        private void GeneratePieces<T>(ChessSide chessSide, int row, int[] columns) where T : ChessPiece
         {
             foreach (int col in columns)
             {
                 Vector2 position = new Vector2(col, row);
-                T piece = factory(position, side);
+                ChessPiece piece = _pieceFactory.CreatePiece<T>(position, chessSide);
 
                 SetupChessPiece(position, piece);
             }
@@ -76,10 +79,6 @@ namespace Chess_Console.Core.Board
 
             _board[position.Y, position.X] = null;
         }
-
-        #endregion
-
-        #region Helper Methods
 
         public bool CheckCoordinates(Vector2 position)
         {
