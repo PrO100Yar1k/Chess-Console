@@ -9,13 +9,10 @@ namespace Chess_Console
     {
         private static void Main()
         {
-            IServiceProvider serviceProvider = DependencyInjectionConfig.ConfigureServices();
+            IServiceProvider serviceProvider = DependencyInjectionConfiguration.ConfigureServices();
             ISwitchableState gameStateController = serviceProvider.GetRequiredService<ISwitchableState>();
 
             gameStateController.SwitchState<GameplayState>();
-
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
         }
     }
 }

@@ -11,12 +11,25 @@ using Chess_Console.Infrastructure.Inputs.Interfaces;
 
 using Microsoft.Extensions.DependencyInjection;
 
-public static class DependencyInjectionConfig
+internal static class DependencyInjectionConfiguration
 {
     public static IServiceProvider ConfigureServices()
     {
         ServiceCollection services = new ServiceCollection();
 
+        RegisterAllServices(services);
+
+        IServiceProvider serviceProvider = services.BuildServiceProvider();
+
+        InitializeAllServices(services, serviceProvider);
+
+        ResolveDependencyCycle(serviceProvider);
+
+        return serviceProvider;
+    }
+
+    private static void RegisterAllServices(ServiceCollection services)
+    {
         services.AddSingleton<BoardModel>();
         services.AddSingleton<RulesValidator>();
         services.AddSingleton<StepController>();
@@ -27,26 +40,17 @@ public static class DependencyInjectionConfig
         services.AddTransient<GameplayState>();
         services.AddTransient<GameCompletionState>();
 
-        services.AddSingleton<IPieceFactory, PieceFactory>();
+        services.AddSingleton<GameCompletionValidator>();
 
+        services.AddSingleton<IPieceFactory, PieceFactory>();
         services.AddSingleton<ISwitchableState, GameStateController>();
+
 
         services.AddKeyedSingleton<IInputHandler, PlayerInputHandler>("Player Input");
         services.AddKeyedSingleton<IInputHandler, EnemyInputHandler>("Enemy Input");
 
         services.AddKeyedSingleton<IGeneralInput, PlayerInput>("Player Input");
         services.AddKeyedSingleton<IGeneralInput, EnemyInput>("Enemy Input");
-
-        IServiceProvider serviceProvider = services.BuildServiceProvider();
-
-        InitializeAllServices(services, serviceProvider);
-
-        RulesValidator rulesValidator = serviceProvider.GetRequiredService<RulesValidator>();
-        StepController stepController = serviceProvider.GetRequiredService<StepController>();
-
-        rulesValidator.SetStepController(stepController);
-
-        return serviceProvider;
     }
 
     private static void InitializeAllServices(ServiceCollection services, IServiceProvider serviceProvider)
@@ -64,5 +68,13 @@ public static class DependencyInjectionConfig
                     initializable.InitializeService();
             }
         }
+    }
+
+    private static void ResolveDependencyCycle(IServiceProvider serviceProvider)
+    {
+        RulesValidator rulesValidator = serviceProvider.GetRequiredService<RulesValidator>();
+        StepController stepController = serviceProvider.GetRequiredService<StepController>();
+
+        rulesValidator.SetStepController(stepController);
     }
 }

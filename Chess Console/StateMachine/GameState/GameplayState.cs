@@ -14,6 +14,7 @@ namespace Chess_Console.StateMachine.GameState
     {
         private CancellationTokenSource _cancellationTokenSource;
 
+        private readonly GameCompletionValidator _gameCompletionValidator;
         private readonly RulesValidator _rulesValidator;
         private readonly BoardRenderer _boardRenderer;
         private readonly MoveValidator _moveValidator;
@@ -21,9 +22,11 @@ namespace Chess_Console.StateMachine.GameState
         private readonly IGeneralInput _playerInput;
         private readonly IGeneralInput _enemyInput;
 
-        public GameplayState(ISwitchableState switchable, BoardRenderer boardRenderer, RulesValidator rulesValidator, MoveValidator moveValidator,
-            [FromKeyedServices("Player Input")] IGeneralInput playerInput, [FromKeyedServices("Player Input")] IGeneralInput enemyInput) : base(switchable) //
+        public GameplayState(ISwitchableState switchable, GameCompletionValidator gameCompletionValidator, BoardRenderer boardRenderer, RulesValidator rulesValidator, MoveValidator moveValidator,
+            [FromKeyedServices("Player Input")] IGeneralInput playerInput, [FromKeyedServices("Player Input")] IGeneralInput enemyInput) : base(switchable) // Player Input -> Enemy Input
         {
+            _gameCompletionValidator = gameCompletionValidator;
+
             _boardRenderer = boardRenderer;
             _rulesValidator = rulesValidator;
             _moveValidator = moveValidator;
@@ -66,7 +69,7 @@ namespace Chess_Console.StateMachine.GameState
         {
             ChessSide opponentSide = chessSide.GetOpposite();
 
-            var gameCompletionResult = ValidateGameCompletion(chessSide);
+            var gameCompletionResult = _gameCompletionValidator.ValidateGameCompletion(chessSide);
 
             if (gameCompletionResult.IsSuccess) { 
                 ExecuteGameCompletion(gameCompletionResult.Value);
@@ -114,26 +117,6 @@ namespace Chess_Console.StateMachine.GameState
         #endregion
 
         #region Game Completion
-
-        private Result<GameCompletionResult> ValidateGameCompletion(ChessSide chessSide)
-        {
-            if (_rulesValidator.ValidateCheckmate(chessSide))
-                return Result<GameCompletionResult>.Success(new GameCompletionResult($"Checkmate for {chessSide}!", GameCompletionType.Win, chessSide.GetOpposite()));
-
-            if (_rulesValidator.ValidateRepeatStepsDraw())
-                return Result<GameCompletionResult>.Success(new GameCompletionResult($"Threefold repetition of the position for {chessSide.GetOpposite()}!", GameCompletionType.Draw));
-
-            if (_rulesValidator.ValidateFiftyStepsNoBeatingDraw())
-                return Result<GameCompletionResult>.Success(new GameCompletionResult($"Executed 50 Steps without beating!", GameCompletionType.Draw));
-
-            if (_rulesValidator.ValidateInsufficientMaterial())
-                return Result<GameCompletionResult>.Success(new GameCompletionResult($"There are no enough pieces to make checkmate!", GameCompletionType.Draw));
-
-            if (_rulesValidator.ValidateStalemate(chessSide))
-                return Result<GameCompletionResult>.Success(new GameCompletionResult($"No way! There are no moves for {chessSide}!", GameCompletionType.Stalemate));
-
-            return Result<GameCompletionResult>.Failure("Game continues...");
-        }
 
         private void ExecuteGameCompletion(GameCompletionResult result)
         {

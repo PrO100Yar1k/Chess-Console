@@ -7,8 +7,10 @@ namespace Chess_Console.StateMachine.Manager
 {
     internal class GameStateController : ISwitchableState, IDisposable
     {
+        private readonly List<BaseState> _allStates = new List<BaseState>();
+
         private readonly IServiceProvider _serviceProvider;
-        private readonly List<BaseState> _allStates;
+
         private BaseState _currentState;
 
         #region IDisposable
@@ -24,7 +26,6 @@ namespace Chess_Console.StateMachine.Manager
         public GameStateController(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            _allStates = new List<BaseState>();
         }
 
         public void InitializeService()
