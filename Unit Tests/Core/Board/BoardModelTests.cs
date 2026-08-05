@@ -8,8 +8,11 @@ public class BoardModelTests
     [Fact]
     public void InitializeShouldPlacePiecesInCorrectPositions()
     {
-        var board = new BoardModel();
+        var pieceFactory = new PieceFactory();
+        var board = new BoardModel(pieceFactory);
 
+        board.InitializeService();
+        
         ChessPiece whitePawn = board.GetBoardField(new Vector2(4, 6));
         ChessPiece blackPawn = board.GetBoardField(new Vector2(4, 1));
 
@@ -22,7 +25,9 @@ public class BoardModelTests
     [Fact]
     public void SetPieceShouldUpdateBoardState()
     {
-        var board = new BoardModel();
+        var pieceFactory = new PieceFactory();
+        var board = new BoardModel(pieceFactory);
+        
         Vector2 position = new Vector2(4, 4);
 
         RookPiece rook = new RookPiece(position, ChessSide.Player);
@@ -34,7 +39,9 @@ public class BoardModelTests
     [Fact]
     public void RemovePieceShouldLeaveEmptyField()
     {
-        var board = new BoardModel();
+        var pieceFactory = new PieceFactory();
+        var board = new BoardModel(pieceFactory);
+        
         Vector2 position = new Vector2(3, 3);
 
         board.SetupChessPiece(position, new KnightPiece(position, ChessSide.Player));
@@ -50,12 +57,10 @@ public class BoardModelTests
     [InlineData(0, 8)]
     public void IsWithinBoundsShouldReturnFalseForInvalidCoordinates(int x, int y)
     {
-        var board = new BoardModel();
+        var pieceFactory = new PieceFactory();
+        var board = new BoardModel(pieceFactory);
+        
         bool isInside = board.CheckCoordinates(new Vector2(x, y));
-
         Assert.False(isInside);
     }
-
-    //[Fact]
-    //public void MovePieceShouldUpdatePositionAndClearOldCell()
 }

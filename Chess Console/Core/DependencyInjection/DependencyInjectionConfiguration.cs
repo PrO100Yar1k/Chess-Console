@@ -5,6 +5,7 @@ using Chess_Console.StateMachine.Base;
 using Chess_Console.StateMachine.Manager;
 using Chess_Console.StateMachine.GameState;
 using Chess_Console.Core.Common.Interfaces;
+using Chess_Console.Core.Pieces.Base;
 using Chess_Console.Infrastructure.Inputs.Handlers;
 using Chess_Console.Infrastructure.Inputs.Instances;
 using Chess_Console.Infrastructure.Inputs.Interfaces;
